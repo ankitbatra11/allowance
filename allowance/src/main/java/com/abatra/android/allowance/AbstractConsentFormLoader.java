@@ -61,7 +61,7 @@ abstract public class AbstractConsentFormLoader implements ConsentFormLoader, Co
                 if (consentStatusLoaderResponse != null) {
                     checkConsentStatusBeforeLoadingConsentForm();
                 } else {
-                    consentStatusLoader.loadConsentStatus(new ConsentStatusLoader.Request(request.getActivity()));
+                    consentStatusLoader.loadConsentStatus(new LoadConsentStatusRequest(request.getActivity()));
                 }
             }
         }

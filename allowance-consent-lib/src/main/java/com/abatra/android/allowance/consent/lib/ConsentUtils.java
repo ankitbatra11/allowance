@@ -5,6 +5,7 @@ import com.abatra.android.allowance.ConsentStatusType;
 import com.abatra.android.allowance.ConsentType;
 import com.google.ads.consent.ConsentInformation;
 import com.google.ads.consent.ConsentStatus;
+import com.google.ads.consent.DebugGeography;
 
 public class ConsentUtils {
 
@@ -38,6 +39,19 @@ public class ConsentUtils {
                 return ConsentType.PA;
             default:
                 throw new IllegalArgumentException("invalid consent status=" + consentStatus);
+        }
+    }
+
+    public static DebugGeography mapDebugGeography(com.abatra.android.allowance.DebugGeography debugGeography) {
+        switch (debugGeography) {
+            case EEA:
+                return DebugGeography.DEBUG_GEOGRAPHY_EEA;
+            case NOT_EEA:
+                return DebugGeography.DEBUG_GEOGRAPHY_NOT_EEA;
+            case DISABLED:
+                return DebugGeography.DEBUG_GEOGRAPHY_DISABLED;
+            default:
+                throw new IllegalArgumentException("Invalid debug geography!");
         }
     }
 }

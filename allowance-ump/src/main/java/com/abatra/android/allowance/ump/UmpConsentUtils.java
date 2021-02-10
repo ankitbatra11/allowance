@@ -2,6 +2,10 @@ package com.abatra.android.allowance.ump;
 
 import androidx.annotation.Nullable;
 
+import com.abatra.android.allowance.ConsentStatusLoaderResponse;
+import com.abatra.android.allowance.ConsentStatusType;
+import com.abatra.android.allowance.ConsentType;
+import com.google.android.ump.ConsentInformation;
 import com.google.android.ump.FormError;
 import com.google.common.base.MoreObjects;
 import com.google.common.base.Supplier;
@@ -41,6 +45,41 @@ public final class UmpConsentUtils {
                 .add("errorCode", formError.getErrorCode())
                 .add("errorMessage", formError.getMessage())
                 .toString();
+    }
+
+    public static ConsentStatusLoaderResponse createResponse(ConsentInformation consentInformation) {
+        return new ConsentStatusLoaderResponse(
+                mapConsentStatusType(consentInformation.getConsentStatus()),
+                mapConsentType(consentInformation.getConsentType()),
+                consentInformation.isConsentFormAvailable());
+    }
+
+    private static ConsentType mapConsentType(int umpType) {
+        switch (umpType) {
+            case ConsentInformation.ConsentType.NON_PERSONALIZED:
+                return ConsentType.NPA;
+            case ConsentInformation.ConsentType.PERSONALIZED:
+                return ConsentType.PA;
+            case ConsentInformation.ConsentType.UNKNOWN:
+                return ConsentType.UNKNOWN;
+            default:
+                throw new IllegalArgumentException("invalid ump type=" + umpType);
+        }
+    }
+
+    private static ConsentStatusType mapConsentStatusType(int umpType) {
+        switch (umpType) {
+            case ConsentInformation.ConsentStatus.NOT_REQUIRED:
+                return ConsentStatusType.NOT_REQUIRED;
+            case ConsentInformation.ConsentStatus.OBTAINED:
+                return ConsentStatusType.OBTAINED;
+            case ConsentInformation.ConsentStatus.REQUIRED:
+                return ConsentStatusType.REQUIRED;
+            case ConsentInformation.ConsentStatus.UNKNOWN:
+                return ConsentStatusType.UNKNOWN;
+            default:
+                throw new IllegalArgumentException("invalid ump type=" + umpType);
+        }
     }
 
 }
