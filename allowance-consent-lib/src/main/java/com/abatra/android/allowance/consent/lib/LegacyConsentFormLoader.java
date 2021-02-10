@@ -49,10 +49,6 @@ public class LegacyConsentFormLoader extends AbstractConsentFormLoader {
         }
     }
 
-    private boolean isFormLoaded() {
-        return response != null && response.isConsentFormLoaded();
-    }
-
     private boolean isFormShowing() {
         return consentForm != null && consentForm.isShowing();
     }

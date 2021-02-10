@@ -53,7 +53,7 @@ abstract public class AbstractConsentFormLoader implements ConsentFormLoader {
 
     @Override
     public void loadConsentForm(LoadConsentFormRequest request) {
-        if (response != null && response.isConsentFormLoaded()) {
+        if (isFormLoaded()) {
             if (request.getFormLoaderListener() != null) {
                 request.getFormLoaderListener().consentFormLoadedSuccessfully(response);
             }
@@ -74,6 +74,10 @@ abstract public class AbstractConsentFormLoader implements ConsentFormLoader {
                 }
             }));
         }
+    }
+
+    protected boolean isFormLoaded() {
+        return response != null && response.isConsentFormLoaded();
     }
 
     private void loadConsentForm(LoadConsentFormRequest request, ConsentStatusLoaderResponse response) {
