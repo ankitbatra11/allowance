@@ -152,7 +152,7 @@ public class LegacyConsentFormLoader extends AbstractConsentFormLoader {
         public void onConsentFormClosed(ConsentStatus consentStatus, Boolean userPrefersAdFree) {
             super.onConsentFormClosed(consentStatus, userPrefersAdFree);
             response = null;
-            loadConsentForm(new LoadConsentFormRequest(request.getActivity()));
+            loadConsentForm(request);
             request.getConsentFormDismissListener().consentFormDismissedSuccessfully();
         }
     }

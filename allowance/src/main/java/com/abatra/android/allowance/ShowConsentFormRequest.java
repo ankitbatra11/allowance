@@ -2,22 +2,13 @@ package com.abatra.android.allowance;
 
 import android.app.Activity;
 
-public class ShowConsentFormRequest {
+public class ShowConsentFormRequest extends LoadConsentFormRequest {
 
-    private final Activity activity;
     private final ConsentFormDismissListener consentFormDismissListener;
 
     public ShowConsentFormRequest(Activity activity, ConsentFormDismissListener consentFormDismissListener) {
-        this.activity = activity;
+        super(activity);
         this.consentFormDismissListener = consentFormDismissListener;
-    }
-
-    public ShowConsentFormRequest(Activity activity) {
-        this(activity, null);
-    }
-
-    public Activity getActivity() {
-        return activity;
     }
 
     public ConsentFormDismissListener getConsentFormDismissListener() {
