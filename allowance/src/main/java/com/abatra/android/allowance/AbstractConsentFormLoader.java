@@ -41,7 +41,10 @@ abstract public class AbstractConsentFormLoader implements ConsentFormLoader {
 
             @Override
             public void onConsentStatusLoadFailure(Throwable error) {
-                request.getFormLoaderListener().loadingConsentFormFailed(error);
+                Timber.e(error, "Failed to load consent status!");
+                if (request.getFormLoaderListener() != null) {
+                    request.getFormLoaderListener().loadingConsentFormFailed(error);
+                }
             }
         }));
     }
@@ -51,7 +54,9 @@ abstract public class AbstractConsentFormLoader implements ConsentFormLoader {
     @Override
     public void loadConsentForm(LoadConsentFormRequest request) {
         if (response != null && response.isConsentFormLoaded()) {
-            request.getFormLoaderListener().consentFormLoadedSuccessfully(response);
+            if (request.getFormLoaderListener() != null) {
+                request.getFormLoaderListener().consentFormLoadedSuccessfully(response);
+            }
         } else {
             consentStatusLoader.loadConsentStatus(request.setStatusLoaderListener(new ConsentStatusLoader.Listener() {
 
@@ -62,17 +67,23 @@ abstract public class AbstractConsentFormLoader implements ConsentFormLoader {
 
                 @Override
                 public void onConsentStatusLoadFailure(Throwable error) {
-                    request.getFormLoaderListener().loadingConsentFormFailed(error);
+                    Timber.e(error, "Failed to load consent status!");
+                    if (request.getFormLoaderListener() != null) {
+                        request.getFormLoaderListener().loadingConsentFormFailed(error);
+                    }
                 }
             }));
         }
     }
 
     private void loadConsentForm(LoadConsentFormRequest request, ConsentStatusLoaderResponse response) {
+        Timber.d("loading consent form for req=%s statusResp=%s", request, response);
         try {
             tryLoadingConsentForm(request, response);
         } catch (Throwable error) {
-            request.getFormLoaderListener().loadingConsentFormFailed(error);
+            if (request.getFormLoaderListener() != null) {
+                request.getFormLoaderListener().loadingConsentFormFailed(error);
+            }
         }
     }
 }

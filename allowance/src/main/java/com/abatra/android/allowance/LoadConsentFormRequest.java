@@ -2,6 +2,7 @@ package com.abatra.android.allowance;
 
 import android.app.Activity;
 
+import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
 public class LoadConsentFormRequest extends LoadConsentStatusRequest {
@@ -33,5 +34,14 @@ public class LoadConsentFormRequest extends LoadConsentStatusRequest {
     @Nullable
     public ConsentFormLoader.Listener getFormLoaderListener() {
         return formLoaderListener;
+    }
+
+    @NonNull
+    @Override
+    public String toString() {
+        return "LoadConsentFormRequest{" +
+                "loadConsentStatusRequest='" + super.toString() + '\'' +
+                ", privacyPolicyUrl='" + privacyPolicyUrl + '\'' +
+                '}';
     }
 }

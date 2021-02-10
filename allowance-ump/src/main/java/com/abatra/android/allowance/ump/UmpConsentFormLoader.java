@@ -22,20 +22,24 @@ public class UmpConsentFormLoader extends AbstractConsentFormLoader implements C
     @Override
     protected void tryLoadingConsentForm(LoadConsentFormRequest request,
                                          ConsentStatusLoaderResponse response) {
-        UserMessagingPlatform.loadConsentForm(request.getActivity(),
-                consentForm -> {
-                    this.consentForm = consentForm;
-                    this.response = new Response(response, true);
-                    if (request.getFormLoaderListener() != null) {
-                        request.getFormLoaderListener().consentFormLoadedSuccessfully(this.response);
-                    }
-                },
-                formError -> {
-                    if (request.getFormLoaderListener() != null) {
-                        RuntimeException error = new RuntimeException(UmpConsentUtils.toString(formError));
-                        request.getFormLoaderListener().loadingConsentFormFailed(error);
-                    }
-                });
+        if (response.isConsentFormAvailable()) {
+            UserMessagingPlatform.loadConsentForm(request.getActivity(),
+                    consentForm -> {
+                        this.consentForm = consentForm;
+                        this.response = new Response(response, true);
+                        if (request.getFormLoaderListener() != null) {
+                            request.getFormLoaderListener().consentFormLoadedSuccessfully(this.response);
+                        }
+                    },
+                    formError -> {
+                        if (request.getFormLoaderListener() != null) {
+                            RuntimeException error = new RuntimeException(UmpConsentUtils.toString(formError));
+                            request.getFormLoaderListener().loadingConsentFormFailed(error);
+                        }
+                    });
+        } else {
+            throw new IllegalStateException("Consent form is not available. Req=" + request + " status resp=" + response);
+        }
     }
 
     @Override

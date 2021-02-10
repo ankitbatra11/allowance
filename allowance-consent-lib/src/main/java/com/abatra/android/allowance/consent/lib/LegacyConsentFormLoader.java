@@ -43,10 +43,18 @@ public class LegacyConsentFormLoader extends AbstractConsentFormLoader {
 
     @Override
     public void showConsentForm(ShowConsentFormRequest request) {
-        if (consentForm != null && !consentForm.isShowing() && formListener != null) {
+        if (isFormLoaded() && !isFormShowing() && formListener != null) {
             formListener.setShowConsentFormListener(new ShowConsentFormListener(request));
             consentForm.show();
         }
+    }
+
+    private boolean isFormLoaded() {
+        return response != null && response.isConsentFormLoaded();
+    }
+
+    private boolean isFormShowing() {
+        return consentForm != null && consentForm.isShowing();
     }
 
     private static class FormListener extends ConsentFormListener {
@@ -113,13 +121,17 @@ public class LegacyConsentFormLoader extends AbstractConsentFormLoader {
         public void onConsentFormLoaded() {
             super.onConsentFormLoaded();
             response = new Response(consentStatusLoaderResponse, true);
-            loadConsentFormRequest.getFormLoaderListener().consentFormLoadedSuccessfully(response);
+            if (loadConsentFormRequest.getFormLoaderListener() != null) {
+                loadConsentFormRequest.getFormLoaderListener().consentFormLoadedSuccessfully(response);
+            }
         }
 
         @Override
         public void onConsentFormError(String reason) {
             super.onConsentFormError(reason);
-            loadConsentFormRequest.getFormLoaderListener().loadingConsentFormFailed(new RuntimeException(reason));
+            if (loadConsentFormRequest.getFormLoaderListener() != null) {
+                loadConsentFormRequest.getFormLoaderListener().loadingConsentFormFailed(new RuntimeException(reason));
+            }
         }
     }
 

@@ -2,10 +2,16 @@ package com.abatra.android.allowance;
 
 import androidx.annotation.NonNull;
 
+import com.google.gson.annotations.Expose;
+
 public class ConsentStatusLoaderResponse {
 
+    @Expose
     private final ConsentStatusType consentStatusType;
+
+    @Expose
     private final ConsentType consentType;
+
     private final boolean isConsentFormAvailable;
 
     public ConsentStatusLoaderResponse(ConsentStatusType consentStatusType, ConsentType consentType, boolean isConsentFormAvailable) {

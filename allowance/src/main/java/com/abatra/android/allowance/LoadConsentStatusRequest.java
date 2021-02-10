@@ -2,6 +2,7 @@ package com.abatra.android.allowance;
 
 import android.app.Activity;
 
+import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
 import java.util.ArrayList;
@@ -61,5 +62,15 @@ public class LoadConsentStatusRequest {
     @Nullable
     public ConsentStatusLoader.Listener getStatusLoaderListener() {
         return statusLoaderListener;
+    }
+
+    @NonNull
+    @Override
+    public String toString() {
+        return "LoadConsentStatusRequest{" +
+                "publisherIds=" + publisherIds +
+                ", testDevices=" + testDevices +
+                ", debugGeography=" + debugGeography +
+                '}';
     }
 }
