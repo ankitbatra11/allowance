@@ -1,0 +1,43 @@
+package com.abatra.android.allowance.consent.lib;
+
+import com.abatra.android.allowance.ConsentStatusLoaderResponse;
+import com.abatra.android.allowance.ConsentStatusType;
+import com.abatra.android.allowance.ConsentType;
+import com.google.ads.consent.ConsentInformation;
+import com.google.ads.consent.ConsentStatus;
+
+public class ConsentUtils {
+
+    public static ConsentStatusLoaderResponse createResponse(ConsentInformation consentInformation, ConsentStatus consentStatus) {
+        ConsentType consentType = mapConsentType(consentStatus);
+        return new ConsentStatusLoaderResponse(mapConsentStatusType(consentInformation, consentType), consentType, true);
+    }
+
+    private static ConsentStatusType mapConsentStatusType(ConsentInformation consentInformation, ConsentType consentType) {
+        if (!consentInformation.isRequestLocationInEeaOrUnknown()) {
+            return ConsentStatusType.NOT_REQUIRED;
+        }
+        switch (consentType) {
+            case NPA:
+            case PA:
+                return ConsentStatusType.OBTAINED;
+            case UNKNOWN:
+                return ConsentStatusType.REQUIRED;
+            default:
+                throw new IllegalArgumentException("invalid consent type=" + consentType);
+        }
+    }
+
+    private static ConsentType mapConsentType(ConsentStatus consentStatus) {
+        switch (consentStatus) {
+            case UNKNOWN:
+                return ConsentType.UNKNOWN;
+            case NON_PERSONALIZED:
+                return ConsentType.NPA;
+            case PERSONALIZED:
+                return ConsentType.PA;
+            default:
+                throw new IllegalArgumentException("invalid consent status=" + consentStatus);
+        }
+    }
+}

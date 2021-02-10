@@ -1,0 +1,5 @@
+include ':allowance-consent-lib'
+include ':allowance-ump'
+include ':allowance'
+include ':app'
+rootProject.name = "Allowance Demo"
