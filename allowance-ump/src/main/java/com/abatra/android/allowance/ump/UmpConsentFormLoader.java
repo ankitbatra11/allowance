@@ -1,77 +1,54 @@
 package com.abatra.android.allowance.ump;
 
-import android.app.Application;
-
 import androidx.annotation.Nullable;
 
 import com.abatra.android.allowance.AbstractConsentFormLoader;
-import com.abatra.android.allowance.ConsentFormShower;
 import com.abatra.android.allowance.ConsentStatusLoader;
 import com.abatra.android.allowance.ConsentStatusLoaderResponse;
+import com.abatra.android.allowance.LoadConsentFormRequest;
+import com.abatra.android.allowance.ShowConsentFormRequest;
 import com.google.android.ump.ConsentForm;
-import com.google.android.ump.FormError;
 import com.google.android.ump.UserMessagingPlatform;
 
 public class UmpConsentFormLoader extends AbstractConsentFormLoader implements ConsentStatusLoader.Listener {
 
-    private static final String ERR_MSG_LOADING_CONSENT_FORM = "Failed to load consent form.";
-
     @Nullable
     private ConsentForm consentForm;
 
-    public UmpConsentFormLoader(ConsentStatusLoader consentStatusLoader, Application application) {
-        super(consentStatusLoader, application);
+    public UmpConsentFormLoader(ConsentStatusLoader consentStatusLoader) {
+        super(consentStatusLoader);
     }
 
     @Override
-    protected Response createConsentFormLoaderResponse(@Nullable ConsentStatusLoaderResponse consentStatusLoaderResponse) {
-        return new Response(consentStatusLoaderResponse, consentForm != null);
-    }
-
-    @Override
-    protected void tryLoadingConsentForm(boolean notifyResponse) {
-
-        consentForm = null;
-        setConsentFormLoading(true);
-
-        UserMessagingPlatform.loadConsentForm(application,
+    protected void tryLoadingConsentForm(LoadConsentFormRequest request,
+                                         ConsentStatusLoaderResponse response) {
+        UserMessagingPlatform.loadConsentForm(request.getActivity(),
                 consentForm -> {
                     this.consentForm = consentForm;
-                    setConsentFormLoading(false);
-                    if (notifyResponse) {
-                        notifyResult();
+                    this.response = new Response(response, true);
+                    if (request.getFormLoaderListener() != null) {
+                        request.getFormLoaderListener().consentFormLoadedSuccessfully(this.response);
                     }
                 },
                 formError -> {
-                    UmpConsentUtils.report(formError, () -> ERR_MSG_LOADING_CONSENT_FORM);
-                    setConsentFormLoading(false);
-                    if (notifyResponse) {
-                        notifyError(new RuntimeException(UmpConsentUtils.toString(formError)));
+                    if (request.getFormLoaderListener() != null) {
+                        RuntimeException error = new RuntimeException(UmpConsentUtils.toString(formError));
+                        request.getFormLoaderListener().loadingConsentFormFailed(error);
                     }
                 });
     }
 
     @Override
-    protected boolean isConsentFormLoaded() {
-        return consentForm != null;
-    }
-
-    @Override
-    public void showConsentForm(ConsentFormShower.Request request) {
+    public void showConsentForm(ShowConsentFormRequest request) {
         if (consentForm != null) {
             consentForm.show(request.getActivity(), formError -> {
-                loadConsentForm(false);
-                notifyFormDismissResult(formError, request);
+                if (formError != null) {
+                    RuntimeException error = new RuntimeException(UmpConsentUtils.toString(formError));
+                    request.getConsentFormDismissListener().dismissingConsentFormFailed(error);
+                } else {
+                    request.getConsentFormDismissListener().consentFormDismissedSuccessfully();
+                }
             });
-        }
-    }
-
-    private void notifyFormDismissResult(FormError formError, ConsentFormShower.Request request) {
-        if (formError != null) {
-            RuntimeException error = new RuntimeException(UmpConsentUtils.toString(formError));
-            request.getConsentFormDismissListener().dismissingConsentFormFailed(error);
-        } else {
-            request.getConsentFormDismissListener().consentFormDismissedSuccessfully();
         }
     }
 }

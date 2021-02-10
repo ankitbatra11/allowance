@@ -14,6 +14,8 @@ public class LoadConsentStatusRequest {
     private final List<String> testDevices = new ArrayList<>();
     @Nullable
     private DebugGeography debugGeography;
+    @Nullable
+    private ConsentStatusLoader.Listener statusLoaderListener;
 
     public LoadConsentStatusRequest(Activity activity) {
         this.activity = activity;
@@ -49,5 +51,15 @@ public class LoadConsentStatusRequest {
 
     public Activity getActivity() {
         return activity;
+    }
+
+    public LoadConsentStatusRequest setStatusLoaderListener(@Nullable ConsentStatusLoader.Listener statusLoaderListener) {
+        this.statusLoaderListener = statusLoaderListener;
+        return this;
+    }
+
+    @Nullable
+    public ConsentStatusLoader.Listener getStatusLoaderListener() {
+        return statusLoaderListener;
     }
 }

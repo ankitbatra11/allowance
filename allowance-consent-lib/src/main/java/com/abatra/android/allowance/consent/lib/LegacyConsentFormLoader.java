@@ -1,53 +1,38 @@
 package com.abatra.android.allowance.consent.lib;
 
-import android.app.Application;
-
 import androidx.annotation.Nullable;
 
 import com.abatra.android.allowance.AbstractConsentFormLoader;
-import com.abatra.android.allowance.ConsentFormDismissListener;
-import com.abatra.android.allowance.ConsentFormShower;
 import com.abatra.android.allowance.ConsentStatusLoader;
 import com.abatra.android.allowance.ConsentStatusLoaderResponse;
+import com.abatra.android.allowance.LoadConsentFormRequest;
+import com.abatra.android.allowance.ShowConsentFormRequest;
 import com.google.ads.consent.ConsentForm;
 import com.google.ads.consent.ConsentFormListener;
-import com.google.ads.consent.ConsentInformation;
 import com.google.ads.consent.ConsentStatus;
 
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.util.concurrent.atomic.AtomicBoolean;
-
-import timber.log.Timber;
 
 public class LegacyConsentFormLoader extends AbstractConsentFormLoader {
 
-    private static final String PRIVACY_POLICY_URL = "http://screenshotcapture.blogspot.in/2017/02/privacy-policy.html";
-
-    private final AtomicBoolean formLoaded = new AtomicBoolean(false);
-    private final FormListener formListener = new FormListener();
+    @Nullable
+    private FormListener formListener;
 
     @Nullable
     private ConsentForm consentForm;
 
-    public LegacyConsentFormLoader(ConsentStatusLoader consentStatusLoader, Application application) {
-        super(consentStatusLoader, application);
+    public LegacyConsentFormLoader(ConsentStatusLoader consentStatusLoader) {
+        super(consentStatusLoader);
     }
 
     @Override
-    protected boolean isConsentFormLoaded() {
-        return formLoaded.get();
-    }
+    protected void tryLoadingConsentForm(LoadConsentFormRequest request, ConsentStatusLoaderResponse response) throws MalformedURLException {
 
-    @Override
-    protected void tryLoadingConsentForm(boolean notifyResponse) throws MalformedURLException {
+        formListener = new FormListener();
+        formListener.setLoadConsentFormListener(new LoadConsentFormListener(request, response));
 
-        setConsentFormLoading(true);
-        formLoaded.set(false);
-        consentForm = null;
-
-        formListener.setNotifyResponse(notifyResponse);
-        consentForm = new ConsentForm.Builder(lifecycleOwner.getContext(), new URL(PRIVACY_POLICY_URL))
+        consentForm = new ConsentForm.Builder(lifecycleOwner.getContext(), new URL(request.getPrivacyPolicyUrl()))
                 .withListener(formListener)
                 .withNonPersonalizedAdsOption()
                 .withPersonalizedAdsOption()
@@ -57,73 +42,107 @@ public class LegacyConsentFormLoader extends AbstractConsentFormLoader {
     }
 
     @Override
-    protected Response createConsentFormLoaderResponse(ConsentStatusLoaderResponse consentStatusLoaderResponse) {
-        return new Response(consentStatusLoaderResponse, formLoaded.get());
-    }
-
-    @Override
-    public void showConsentForm(ConsentFormShower.Request request) {
-        if (consentForm != null && !consentForm.isShowing()) {
-            formListener.setConsentFormDismissListener(request.getConsentFormDismissListener());
+    public void showConsentForm(ShowConsentFormRequest request) {
+        if (consentForm != null && !consentForm.isShowing() && formListener != null) {
+            formListener.setShowConsentFormListener(new ShowConsentFormListener(request));
             consentForm.show();
         }
     }
 
-    private class FormListener extends ConsentFormListener {
+    private static class FormListener extends ConsentFormListener {
 
         @Nullable
-        private ConsentFormDismissListener consentFormDismissListener;
-        private boolean notifyResponse = false;
+        private ConsentFormListener loadConsentFormListener;
 
-        public void setConsentFormDismissListener(@Nullable ConsentFormDismissListener consentFormDismissListener) {
-            this.consentFormDismissListener = consentFormDismissListener;
+        @Nullable
+        private ConsentFormListener showConsentFormListener;
+
+        public void setLoadConsentFormListener(@Nullable ConsentFormListener loadConsentFormListener) {
+            this.loadConsentFormListener = loadConsentFormListener;
         }
 
-        public void setNotifyResponse(boolean notifyResponse) {
-            this.notifyResponse = notifyResponse;
+        public void setShowConsentFormListener(@Nullable ConsentFormListener showConsentFormListener) {
+            this.showConsentFormListener = showConsentFormListener;
         }
 
         @Override
         public void onConsentFormLoaded() {
             super.onConsentFormLoaded();
-            onConsentFormLoadResponse(null);
+            if (loadConsentFormListener != null) {
+                loadConsentFormListener.onConsentFormLoaded();
+            }
         }
 
         @Override
         public void onConsentFormError(String reason) {
             super.onConsentFormError(reason);
-            onConsentFormLoadResponse(reason);
+            if (loadConsentFormListener != null) {
+                loadConsentFormListener.onConsentFormError(reason);
+            }
         }
 
-        private void onConsentFormLoadResponse(String error) {
-            formLoaded.set(error == null);
-            setConsentFormLoading(false);
-            if (notifyResponse) {
-                if (error != null) {
-                    notifyError(new RuntimeException("Consent form error. Reason=" + error));
-                } else {
-                    notifyResult();
-                }
+        @Override
+        public void onConsentFormOpened() {
+            super.onConsentFormOpened();
+            if (showConsentFormListener != null) {
+                showConsentFormListener.onConsentFormOpened();
             }
-            Timber.d("onConsentFormLoadResponse error=%s", error);
         }
 
         @Override
         public void onConsentFormClosed(ConsentStatus consentStatus, Boolean userPrefersAdFree) {
             super.onConsentFormClosed(consentStatus, userPrefersAdFree);
-            setNewConsentStatus(consentStatus);
-            loadConsentForm(false);
-            if (consentFormDismissListener != null) {
-                consentFormDismissListener.consentFormDismissedSuccessfully();
+            if (showConsentFormListener != null) {
+                showConsentFormListener.onConsentFormClosed(consentStatus, userPrefersAdFree);
             }
         }
     }
 
-    private void setNewConsentStatus(ConsentStatus newConsentStatus) {
-        LegacyConsentStatusLoader statusLoader = (LegacyConsentStatusLoader) LegacyConsentFormLoader.this.consentStatusLoader;
-        ConsentInformation information = statusLoader.getConsentInformation();
-        if (information != null) {
-            LegacyConsentFormLoader.this.consentStatusLoaderResponse = ConsentUtils.createResponse(information, newConsentStatus);
+    private class LoadConsentFormListener extends ConsentFormListener {
+
+        private final LoadConsentFormRequest loadConsentFormRequest;
+        private final ConsentStatusLoaderResponse consentStatusLoaderResponse;
+
+        private LoadConsentFormListener(LoadConsentFormRequest loadConsentFormRequest,
+                                        ConsentStatusLoaderResponse consentStatusLoaderResponse) {
+            this.loadConsentFormRequest = loadConsentFormRequest;
+            this.consentStatusLoaderResponse = consentStatusLoaderResponse;
+        }
+
+        @Override
+        public void onConsentFormLoaded() {
+            super.onConsentFormLoaded();
+            response = new Response(consentStatusLoaderResponse, true);
+            loadConsentFormRequest.getFormLoaderListener().consentFormLoadedSuccessfully(response);
+        }
+
+        @Override
+        public void onConsentFormError(String reason) {
+            super.onConsentFormError(reason);
+            loadConsentFormRequest.getFormLoaderListener().loadingConsentFormFailed(new RuntimeException(reason));
         }
     }
+
+    private class ShowConsentFormListener extends ConsentFormListener {
+
+        private final ShowConsentFormRequest request;
+
+        private ShowConsentFormListener(ShowConsentFormRequest request) {
+            this.request = request;
+        }
+
+        @Override
+        public void onConsentFormOpened() {
+            super.onConsentFormOpened();
+        }
+
+        @Override
+        public void onConsentFormClosed(ConsentStatus consentStatus, Boolean userPrefersAdFree) {
+            super.onConsentFormClosed(consentStatus, userPrefersAdFree);
+            response = null;
+            loadConsentForm(new LoadConsentFormRequest(request.getActivity()));
+            request.getConsentFormDismissListener().consentFormDismissedSuccessfully();
+        }
+    }
+
 }

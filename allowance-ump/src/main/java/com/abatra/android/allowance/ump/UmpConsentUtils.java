@@ -5,6 +5,8 @@ import androidx.annotation.Nullable;
 import com.abatra.android.allowance.ConsentStatusLoaderResponse;
 import com.abatra.android.allowance.ConsentStatusType;
 import com.abatra.android.allowance.ConsentType;
+import com.abatra.android.allowance.DebugGeography;
+import com.google.android.ump.ConsentDebugSettings;
 import com.google.android.ump.ConsentInformation;
 import com.google.android.ump.FormError;
 import com.google.common.base.MoreObjects;
@@ -79,6 +81,19 @@ public final class UmpConsentUtils {
                 return ConsentStatusType.UNKNOWN;
             default:
                 throw new IllegalArgumentException("invalid ump type=" + umpType);
+        }
+    }
+
+    public static int mapDebugGeography(DebugGeography debugGeography) {
+        switch (debugGeography) {
+            case EEA:
+                return ConsentDebugSettings.DebugGeography.DEBUG_GEOGRAPHY_EEA;
+            case NOT_EEA:
+                return ConsentDebugSettings.DebugGeography.DEBUG_GEOGRAPHY_NOT_EEA;
+            case DISABLED:
+                return ConsentDebugSettings.DebugGeography.DEBUG_GEOGRAPHY_DISABLED;
+            default:
+                throw new IllegalArgumentException("invalid debug geography=" + debugGeography);
         }
     }
 

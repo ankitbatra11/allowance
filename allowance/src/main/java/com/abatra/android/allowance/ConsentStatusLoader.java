@@ -1,8 +1,8 @@
 package com.abatra.android.allowance;
 
-import com.abatra.android.wheelie.lifecycle.LifecycleObserverObservable;
+import com.abatra.android.wheelie.lifecycle.ILifecycleObserver;
 
-public interface ConsentStatusLoader extends LifecycleObserverObservable<ConsentStatusLoader.Listener> {
+public interface ConsentStatusLoader extends ILifecycleObserver {
 
     void loadConsentStatus(LoadConsentStatusRequest request);
 

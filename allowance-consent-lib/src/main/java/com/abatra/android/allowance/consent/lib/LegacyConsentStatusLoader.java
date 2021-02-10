@@ -2,10 +2,7 @@ package com.abatra.android.allowance.consent.lib;
 
 import android.content.Context;
 
-import androidx.annotation.Nullable;
-
 import com.abatra.android.allowance.AbstractConsentStatusLoader;
-import com.abatra.android.allowance.ConsentStatusLoaderResponse;
 import com.abatra.android.allowance.ConsentStatusStore;
 import com.abatra.android.allowance.LoadConsentStatusRequest;
 import com.google.ads.consent.ConsentInfoUpdateListener;
@@ -17,8 +14,6 @@ import timber.log.Timber;
 public class LegacyConsentStatusLoader extends AbstractConsentStatusLoader {
 
     private final Context context;
-    @Nullable
-    private ConsentInformation consentInformation;
 
     public LegacyConsentStatusLoader(ConsentStatusStore consentStatusStore, Context context) {
         super(consentStatusStore);
@@ -26,43 +21,35 @@ public class LegacyConsentStatusLoader extends AbstractConsentStatusLoader {
     }
 
     @Override
-    public void loadConsentStatus(LoadConsentStatusRequest request) {
+    protected void tryLoadingConsentStatus(LoadConsentStatusRequest loadConsentStatusRequest) {
 
-        consentInformation = ConsentInformation.getInstance(context);
+        ConsentInformation consentInformation = ConsentInformation.getInstance(context);
 
-        for (String testDevice : request.getTestDevices()) {
+        for (String testDevice : loadConsentStatusRequest.getTestDevices()) {
             consentInformation.addTestDevice(testDevice);
         }
 
-        consentInformation.setDebugGeography(ConsentUtils.mapDebugGeography(request.getDebugGeography()));
+        consentInformation.setDebugGeography(ConsentUtils.mapDebugGeography(loadConsentStatusRequest.getDebugGeography()));
 
         Timber.d("loading consent status");
-        consentInformation.requestConsentInfoUpdate(request.getPublisherIds().toArray(new String[0]), new ConsentInfoUpdateListener() {
+        consentInformation.requestConsentInfoUpdate(loadConsentStatusRequest.getPublisherIds().toArray(new String[0]), new ConsentInfoUpdateListener() {
 
             @Override
             public void onConsentInfoUpdated(ConsentStatus consentStatus) {
-                ConsentStatusLoaderResponse response = ConsentUtils.createResponse(consentInformation, consentStatus);
-                listeners.forEachObserver(type -> type.loadedSuccessfully(response));
+                response = ConsentUtils.createResponse(consentInformation, consentStatus);
+                if (loadConsentStatusRequest.getStatusLoaderListener() != null) {
+                    loadConsentStatusRequest.getStatusLoaderListener().loadedSuccessfully(response);
+                }
             }
 
             @Override
             public void onFailedToUpdateConsentInfo(String errorDescription) {
                 RuntimeException error = new RuntimeException(errorDescription);
                 Timber.e(error, "onFailedToUpdateConsentInfo");
-                listeners.forEachObserver(type -> type.onConsentStatusLoadFailure(error));
+                if (loadConsentStatusRequest.getStatusLoaderListener() != null) {
+                    loadConsentStatusRequest.getStatusLoaderListener().onConsentStatusLoadFailure(error);
+                }
             }
         });
-    }
-
-
-    @Nullable
-    public ConsentInformation getConsentInformation() {
-        return consentInformation;
-    }
-
-    @Override
-    public void onDestroy() {
-        consentInformation = null;
-        super.onDestroy();
     }
 }

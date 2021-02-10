@@ -1,16 +1,14 @@
 package com.abatra.android.allowance;
 
-import android.app.Activity;
-
 import androidx.annotation.Nullable;
 
 import com.abatra.android.wheelie.lifecycle.LifecycleObserverObservable;
 
 public interface ConsentFormLoader extends LifecycleObserverObservable<ConsentFormLoader.Listener>, ConsentFormShower {
 
-    void loadConsentFormIfConsentIsRequired(Request request);
+    void loadConsentFormIfConsentIsRequired(LoadConsentFormRequest request);
 
-    void loadConsentForm(Request request);
+    void loadConsentForm(LoadConsentFormRequest request);
 
     @Override
     default void addObserver(Listener observer) {
@@ -20,29 +18,6 @@ public interface ConsentFormLoader extends LifecycleObserverObservable<ConsentFo
     @Override
     default void removeObserver(Listener observer) {
 
-    }
-
-    class Request {
-
-        private final Activity activity;
-        private final ConsentFormLoader.Listener listener;
-
-        public Request(Activity activity, ConsentFormLoader.Listener listener) {
-            this.activity = activity;
-            this.listener = listener;
-        }
-
-        public Request(Activity activity) {
-            this(activity, null);
-        }
-
-        public Activity getActivity() {
-            return activity;
-        }
-
-        public ConsentFormLoader.Listener getListener() {
-            return listener;
-        }
     }
 
     class Response {

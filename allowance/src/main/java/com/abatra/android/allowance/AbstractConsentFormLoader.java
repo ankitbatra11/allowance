@@ -1,150 +1,78 @@
 package com.abatra.android.allowance;
 
-import android.app.Application;
-
 import androidx.annotation.Nullable;
 
 import com.abatra.android.wheelie.lifecycle.ILifecycleOwner;
-import com.abatra.android.wheelie.pattern.Observable;
 
 import java.net.MalformedURLException;
-import java.util.concurrent.atomic.AtomicBoolean;
 
-abstract public class AbstractConsentFormLoader implements ConsentFormLoader, ConsentStatusLoader.Listener {
+import timber.log.Timber;
+
+abstract public class AbstractConsentFormLoader implements ConsentFormLoader {
 
     protected final ConsentStatusLoader consentStatusLoader;
-    protected final Application application;
-    private final Observable<ConsentFormLoader.Listener> listeners = Observable.hashSet();
-    private final AtomicBoolean consentFormLoading = new AtomicBoolean(false);
-    private final AtomicBoolean loadConsentFormWithConsent = new AtomicBoolean(false);
     protected ILifecycleOwner lifecycleOwner;
     @Nullable
-    protected ConsentStatusLoaderResponse consentStatusLoaderResponse;
+    protected ConsentFormLoader.Response response;
 
-    protected AbstractConsentFormLoader(ConsentStatusLoader consentStatusLoader, Application application) {
+    protected AbstractConsentFormLoader(ConsentStatusLoader consentStatusLoader) {
         this.consentStatusLoader = consentStatusLoader;
-        this.application = application;
     }
 
     @Override
     public void observeLifecycle(ILifecycleOwner lifecycleOwner) {
-
         this.lifecycleOwner = lifecycleOwner;
-
-        consentStatusLoader.addObserver(this);
         consentStatusLoader.observeLifecycle(this.lifecycleOwner);
-
         this.lifecycleOwner.getLifecycle().addObserver(this);
     }
 
     @Override
-    public void addObserver(ConsentFormLoader.Listener observer) {
-        listeners.addObserver(observer);
-    }
+    public void loadConsentFormIfConsentIsRequired(LoadConsentFormRequest request) {
+        consentStatusLoader.loadConsentStatus(request.setStatusLoaderListener(new ConsentStatusLoader.Listener() {
 
-    @Override
-    public void removeObserver(ConsentFormLoader.Listener observer) {
-        listeners.removeObserver(observer);
-    }
-
-    @Override
-    public void loadConsentFormIfConsentIsRequired(ConsentFormLoader.Request request) {
-        doLoadConsentForm(request, false);
-    }
-
-    private void doLoadConsentForm(ConsentFormLoader.Request request, boolean loadConsentFormWithConsent) {
-        this.loadConsentFormWithConsent.set(loadConsentFormWithConsent);
-        if (isConsentFormLoaded()) {
-            notifyResult();
-        } else {
-            if (!consentFormLoading.getAndSet(true)) {
-                if (consentStatusLoaderResponse != null) {
-                    checkConsentStatusBeforeLoadingConsentForm();
+            @Override
+            public void loadedSuccessfully(ConsentStatusLoaderResponse response) {
+                if (response.isConsentRequired()) {
+                    loadConsentForm(request, response);
                 } else {
-                    consentStatusLoader.loadConsentStatus(new LoadConsentStatusRequest(request.getActivity()));
+                    Timber.d("not loading consent form as consent is not required");
                 }
             }
-        }
+
+            @Override
+            public void onConsentStatusLoadFailure(Throwable error) {
+                request.getFormLoaderListener().loadingConsentFormFailed(error);
+            }
+        }));
     }
 
-    protected void notifyResult() {
-        Response response = createConsentFormLoaderResponse(consentStatusLoaderResponse);
-        listeners.forEachObserver(type -> type.consentFormLoadedSuccessfully(response));
-    }
+    protected abstract void tryLoadingConsentForm(LoadConsentFormRequest request, ConsentStatusLoaderResponse response) throws MalformedURLException;
 
-    protected abstract Response createConsentFormLoaderResponse(@Nullable ConsentStatusLoaderResponse consentStatusLoaderResponse);
-
-    private void checkConsentStatusBeforeLoadingConsentForm() {
-        if (consentStatusLoaderResponse.isConsentRequired()) {
-            loadConsentFormIfAvailable();
+    @Override
+    public void loadConsentForm(LoadConsentFormRequest request) {
+        if (response != null && response.isConsentFormLoaded()) {
+            request.getFormLoaderListener().consentFormLoadedSuccessfully(response);
         } else {
-            if (loadConsentFormWithConsent.get()) {
-                loadConsentFormIfAvailable();
-            } else {
-                setConsentFormNotLoadingNotifyResult();
-            }
+            consentStatusLoader.loadConsentStatus(request.setStatusLoaderListener(new ConsentStatusLoader.Listener() {
+
+                @Override
+                public void loadedSuccessfully(ConsentStatusLoaderResponse response) {
+                    loadConsentForm(request, response);
+                }
+
+                @Override
+                public void onConsentStatusLoadFailure(Throwable error) {
+                    request.getFormLoaderListener().loadingConsentFormFailed(error);
+                }
+            }));
         }
     }
 
-    private void setConsentFormNotLoadingNotifyResult() {
-        setConsentFormLoading(false);
-        notifyResult();
-    }
-
-    private void loadConsentFormIfAvailable() {
-        if (consentStatusLoaderResponse != null) {
-            if (consentStatusLoaderResponse.isConsentFormAvailable()) {
-                loadConsentForm(true);
-            } else {
-                setConsentFormNotLoadingNotifyResult();
-            }
-        }
-    }
-
-    protected void loadConsentForm(boolean notifyResponse) {
-        setConsentFormLoading(true);
+    private void loadConsentForm(LoadConsentFormRequest request, ConsentStatusLoaderResponse response) {
         try {
-            tryLoadingConsentForm(notifyResponse);
+            tryLoadingConsentForm(request, response);
         } catch (Throwable error) {
-            setConsentFormLoading(false);
-            if (notifyResponse) {
-                notifyError(error);
-            }
+            request.getFormLoaderListener().loadingConsentFormFailed(error);
         }
-    }
-
-    protected abstract void tryLoadingConsentForm(boolean notifyResponse) throws MalformedURLException;
-
-    protected abstract boolean isConsentFormLoaded();
-
-    protected void setConsentFormLoading(boolean loading) {
-        consentFormLoading.set(loading);
-    }
-
-    @Override
-    public void loadConsentForm(Request request) {
-        doLoadConsentForm(request, true);
-    }
-
-    @Override
-    public void loadedSuccessfully(ConsentStatusLoaderResponse response) {
-        consentStatusLoaderResponse = response;
-        checkConsentStatusBeforeLoadingConsentForm();
-    }
-
-    @Override
-    public void onConsentStatusLoadFailure(Throwable error) {
-        setConsentFormLoading(false);
-        notifyError(new RuntimeException("Loading consent status failed!", error));
-    }
-
-    protected void notifyError(Throwable error) {
-        listeners.forEachObserver(type -> type.loadingConsentFormFailed(error));
-    }
-
-    @Override
-    public void onDestroy() {
-        lifecycleOwner = null;
-        listeners.removeObservers();
     }
 }
