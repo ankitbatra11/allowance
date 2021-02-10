@@ -3,6 +3,7 @@ package com.abatra.android.allowance;
 import android.content.SharedPreferences;
 
 import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 
 import bolts.Task;
 import timber.log.Timber;
@@ -14,9 +15,15 @@ public class ConsentStatusPreference implements ConsentStatusStore {
     private final SharedPreferences preferences;
     private final Gson gson;
 
-    public ConsentStatusPreference(SharedPreferences preferences, Gson gson) {
+    private ConsentStatusPreference(SharedPreferences preferences, Gson gson) {
         this.preferences = preferences;
         this.gson = gson;
+    }
+
+    public static ConsentStatusPreference create(SharedPreferences sharedPreferences) {
+        return new ConsentStatusPreference(sharedPreferences, new GsonBuilder()
+                .excludeFieldsWithoutExposeAnnotation()
+                .create());
     }
 
     @Override
