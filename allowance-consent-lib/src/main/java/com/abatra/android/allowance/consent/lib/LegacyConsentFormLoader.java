@@ -7,6 +7,7 @@ import androidx.annotation.Nullable;
 import com.abatra.android.allowance.AbstractConsentFormLoader;
 import com.abatra.android.allowance.ConsentFormDismissListener;
 import com.abatra.android.allowance.ConsentFormShower;
+import com.abatra.android.allowance.ConsentStatusLoader;
 import com.abatra.android.allowance.ConsentStatusLoaderResponse;
 import com.google.ads.consent.ConsentForm;
 import com.google.ads.consent.ConsentFormListener;
@@ -29,7 +30,7 @@ public class LegacyConsentFormLoader extends AbstractConsentFormLoader {
     @Nullable
     private ConsentForm consentForm;
 
-    public LegacyConsentFormLoader(LegacyConsentStatusLoader consentStatusLoader, Application application) {
+    public LegacyConsentFormLoader(ConsentStatusLoader consentStatusLoader, Application application) {
         super(consentStatusLoader, application);
     }
 

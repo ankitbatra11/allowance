@@ -20,7 +20,7 @@ public class LegacyConsentStatusLoader extends AbstractConsentStatusLoader {
     @Nullable
     private ConsentInformation consentInformation;
 
-    LegacyConsentStatusLoader(ConsentStatusStore consentStatusStore, Context context) {
+    public LegacyConsentStatusLoader(ConsentStatusStore consentStatusStore, Context context) {
         super(consentStatusStore);
         this.context = context;
     }
