@@ -23,11 +23,11 @@ public class UmpConsentStatusLoader extends AbstractConsentStatusLoader {
     protected void tryLoadingConsentStatus(LoadConsentStatusRequest loadConsentStatusRequest) {
 
         ConsentDebugSettings.Builder builder = new ConsentDebugSettings.Builder(context);
-        loadConsentStatusRequest.getDebugGeography().ifPresent(dg -> {
+        loadConsentStatusRequest.getConsentRequest().getDebugGeography().ifPresent(dg -> {
             int debugGeography = UmpConsentUtils.mapDebugGeography(dg);
             builder.setDebugGeography(debugGeography);
         });
-        for (String testDevice : loadConsentStatusRequest.getTestDevices()) {
+        for (String testDevice : loadConsentStatusRequest.getConsentRequest().getTestDevices()) {
             builder.addTestDeviceHashedId(testDevice);
         }
         ConsentDebugSettings consentDebugSettings = builder.build();
@@ -38,7 +38,8 @@ public class UmpConsentStatusLoader extends AbstractConsentStatusLoader {
                 .build();
 
         ConsentInformation consentInformation = UserMessagingPlatform.getConsentInformation(context);
-        consentInformation.requestConsentInfoUpdate(loadConsentStatusRequest.getActivity(), parameters,
+        consentInformation.requestConsentInfoUpdate(loadConsentStatusRequest.getConsentRequest().getActivity(),
+                parameters,
                 () -> {
                     response = UmpConsentUtils.createResponse(consentInformation);
                     loadConsentStatusRequest.getStatusLoaderListener().ifPresent(l -> l.loadedSuccessfully(response));
