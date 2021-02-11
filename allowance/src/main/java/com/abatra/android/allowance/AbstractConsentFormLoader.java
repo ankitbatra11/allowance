@@ -110,28 +110,26 @@ abstract public class AbstractConsentFormLoader implements ConsentFormLoader {
 
     @Override
     public void showConsentForm(ShowConsentFormRequest request) {
-        request.setConsentFormDismissListener(new ConsentFormDismissListener() {
-
+        request.setConsentFormDismissListener(new ConsentFormDismissListener.Wrapper(request.getConsentFormDismissListener()) {
             @Override
             public void consentFormDismissedSuccessfully() {
                 response = null;
                 invalidateCurrentForm();
-                LoadConsentStatusRequest statusRequest = new LoadConsentStatusRequest(request.getConsentRequest());
-                consentStatusLoader.loadConsentStatus(statusRequest.setStatusLoaderListener(new ConsentStatusLoader.Listener() {
-                    @Override
-                    public void loadedSuccessfully(ConsentStatusLoaderResponse response) {
-                        loadConsentForm(new LoadConsentFormRequest(request.getConsentRequest()), response);
-                    }
-                }));
-                request.getConsentFormDismissListener().consentFormDismissedSuccessfully();
-            }
-
-            @Override
-            public void dismissingConsentFormFailed(Throwable error) {
-                request.getConsentFormDismissListener().dismissingConsentFormFailed(error);
+                loadConsentForm(request);
+                super.consentFormDismissedSuccessfully();
             }
         });
         doShowConsentForm(request);
+    }
+
+    private void loadConsentForm(ShowConsentFormRequest request) {
+        LoadConsentStatusRequest statusRequest = new LoadConsentStatusRequest(request.getConsentRequest());
+        consentStatusLoader.loadConsentStatus(statusRequest.setStatusLoaderListener(new ConsentStatusLoader.Listener() {
+            @Override
+            public void loadedSuccessfully(ConsentStatusLoaderResponse response) {
+                loadConsentForm(new LoadConsentFormRequest(request.getConsentRequest()), response);
+            }
+        }));
     }
 
     protected abstract void invalidateCurrentForm();
