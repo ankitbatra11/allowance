@@ -114,7 +114,6 @@ abstract public class AbstractConsentFormLoader implements ConsentFormLoader {
                 consentStatusLoader.loadConsentStatus(request.setStatusLoaderListener(new ConsentStatusLoader.Listener() {
                     @Override
                     public void loadedSuccessfully(ConsentStatusLoaderResponse response) {
-                        request.setFormLoaderListener(null);
                         loadConsentForm(request, response);
                     }
                 }));
