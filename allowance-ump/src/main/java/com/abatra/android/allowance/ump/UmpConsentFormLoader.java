@@ -10,6 +10,8 @@ import com.abatra.android.allowance.ShowConsentFormRequest;
 import com.google.android.ump.ConsentForm;
 import com.google.android.ump.UserMessagingPlatform;
 
+import java.util.Optional;
+
 public class UmpConsentFormLoader extends AbstractConsentFormLoader implements ConsentStatusLoader.Listener {
 
     @Nullable
@@ -26,16 +28,16 @@ public class UmpConsentFormLoader extends AbstractConsentFormLoader implements C
             UserMessagingPlatform.loadConsentForm(request.getActivity(),
                     consentForm -> {
                         this.consentForm = consentForm;
-                        this.response = new Response(response, true);
-                        if (request.getFormLoaderListener() != null) {
-                            request.getFormLoaderListener().consentFormLoadedSuccessfully(this.response);
-                        }
+                        Response formLoadResponse = new Response(response, true);
+                        setResponse(formLoadResponse);
+                        request.getFormLoaderListener().ifPresent(l -> l.consentFormLoadedSuccessfully(formLoadResponse));
                     },
                     formError -> {
-                        if (request.getFormLoaderListener() != null) {
+                        Optional<Listener> formLoaderListener = request.getFormLoaderListener();
+                        formLoaderListener.ifPresent(l -> {
                             RuntimeException error = new RuntimeException(UmpConsentUtils.toString(formError));
-                            request.getFormLoaderListener().loadingConsentFormFailed(error);
-                        }
+                            l.loadingConsentFormFailed(error);
+                        });
                     });
         } else {
             throw new IllegalStateException("Consent form is not available. Req=" + request + " status resp=" + response);
@@ -43,16 +45,23 @@ public class UmpConsentFormLoader extends AbstractConsentFormLoader implements C
     }
 
     @Override
-    public void showConsentForm(ShowConsentFormRequest request) {
-        if (consentForm != null) {
-            consentForm.show(request.getActivity(), formError -> {
-                if (formError != null) {
-                    RuntimeException error = new RuntimeException(UmpConsentUtils.toString(formError));
-                    request.getConsentFormDismissListener().dismissingConsentFormFailed(error);
-                } else {
-                    request.getConsentFormDismissListener().consentFormDismissedSuccessfully();
-                }
-            });
-        }
+    protected void doShowConsentForm(ShowConsentFormRequest request) {
+        getConsentForm().ifPresent(cf -> cf.show(request.getActivity(), formError -> {
+            if (formError != null) {
+                RuntimeException error = new RuntimeException(UmpConsentUtils.toString(formError));
+                request.getConsentFormDismissListener().dismissingConsentFormFailed(error);
+            } else {
+                request.getConsentFormDismissListener().consentFormDismissedSuccessfully();
+            }
+        }));
+    }
+
+    private Optional<ConsentForm> getConsentForm() {
+        return Optional.ofNullable(consentForm);
+    }
+
+    @Override
+    protected void invalidateCurrentForm() {
+        consentForm = null;
     }
 }

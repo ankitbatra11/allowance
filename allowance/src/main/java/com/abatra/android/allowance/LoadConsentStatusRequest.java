@@ -7,6 +7,7 @@ import androidx.annotation.Nullable;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 public class LoadConsentStatusRequest {
 
@@ -45,9 +46,8 @@ public class LoadConsentStatusRequest {
         return this;
     }
 
-    @Nullable
-    public DebugGeography getDebugGeography() {
-        return debugGeography;
+    public Optional<DebugGeography> getDebugGeography() {
+        return Optional.ofNullable(debugGeography);
     }
 
     public Activity getActivity() {
@@ -59,9 +59,8 @@ public class LoadConsentStatusRequest {
         return this;
     }
 
-    @Nullable
-    public ConsentStatusLoader.Listener getStatusLoaderListener() {
-        return statusLoaderListener;
+    public Optional<ConsentStatusLoader.Listener> getStatusLoaderListener() {
+        return Optional.ofNullable(statusLoaderListener);
     }
 
     @NonNull

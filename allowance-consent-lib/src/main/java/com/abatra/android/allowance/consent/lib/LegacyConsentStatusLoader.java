@@ -8,6 +8,7 @@ import com.abatra.android.allowance.LoadConsentStatusRequest;
 import com.google.ads.consent.ConsentInfoUpdateListener;
 import com.google.ads.consent.ConsentInformation;
 import com.google.ads.consent.ConsentStatus;
+import com.google.ads.consent.DebugGeography;
 
 import timber.log.Timber;
 
@@ -26,27 +27,26 @@ public class LegacyConsentStatusLoader extends AbstractConsentStatusLoader {
         for (String testDevice : loadConsentStatusRequest.getTestDevices()) {
             consentInformation.addTestDevice(testDevice);
         }
-        if (loadConsentStatusRequest.getDebugGeography() != null) {
-            consentInformation.setDebugGeography(ConsentUtils.mapDebugGeography(loadConsentStatusRequest.getDebugGeography()));
-        }
+        loadConsentStatusRequest.getDebugGeography().ifPresent(dg -> {
+            DebugGeography debugGeography = ConsentUtils.mapDebugGeography(dg);
+            consentInformation.setDebugGeography(debugGeography);
+        });
         Timber.d("loading consent status");
         consentInformation.requestConsentInfoUpdate(loadConsentStatusRequest.getPublisherIds().toArray(new String[0]), new ConsentInfoUpdateListener() {
 
             @Override
             public void onConsentInfoUpdated(ConsentStatus consentStatus) {
                 response = ConsentUtils.createResponse(consentInformation, consentStatus);
-                if (loadConsentStatusRequest.getStatusLoaderListener() != null) {
-                    loadConsentStatusRequest.getStatusLoaderListener().loadedSuccessfully(response);
-                }
+                loadConsentStatusRequest.getStatusLoaderListener().ifPresent(l -> l.loadedSuccessfully(response));
             }
 
             @Override
             public void onFailedToUpdateConsentInfo(String errorDescription) {
-                RuntimeException error = new RuntimeException(errorDescription);
-                Timber.e(error, "onFailedToUpdateConsentInfo");
-                if (loadConsentStatusRequest.getStatusLoaderListener() != null) {
-                    loadConsentStatusRequest.getStatusLoaderListener().onConsentStatusLoadFailure(error);
-                }
+                Timber.e("onFailedToUpdateConsentInfo errorDescription=%s", errorDescription);
+                loadConsentStatusRequest.getStatusLoaderListener().ifPresent(l -> {
+                    RuntimeException error = new RuntimeException(errorDescription);
+                    l.onConsentStatusLoadFailure(error);
+                });
             }
         });
     }

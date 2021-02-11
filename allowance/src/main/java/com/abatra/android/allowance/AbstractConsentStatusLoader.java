@@ -2,6 +2,8 @@ package com.abatra.android.allowance;
 
 import androidx.annotation.Nullable;
 
+import java.util.Optional;
+
 abstract public class AbstractConsentStatusLoader implements ConsentStatusLoader {
 
     private final ConsentStatusStore consentStatusStore;
@@ -14,7 +16,7 @@ abstract public class AbstractConsentStatusLoader implements ConsentStatusLoader
 
     @Override
     public void loadConsentStatus(LoadConsentStatusRequest request) {
-        LoadListenerWrapper statusLoaderListener = new LoadListenerWrapper(request.getStatusLoaderListener()) {
+        LoadListenerWrapper statusLoaderListener = new LoadListenerWrapper(request.getStatusLoaderListener().orElse(null)) {
             @Override
             public void loadedSuccessfully(ConsentStatusLoaderResponse response) {
                 consentStatusStore.loadedSuccessfully(response);
@@ -52,16 +54,16 @@ abstract public class AbstractConsentStatusLoader implements ConsentStatusLoader
 
         @Override
         public void loadedSuccessfully(ConsentStatusLoaderResponse response) {
-            if (listener != null) {
-                listener.loadedSuccessfully(response);
-            }
+            getListener().ifPresent(l -> l.loadedSuccessfully(response));
+        }
+
+        private Optional<Listener> getListener() {
+            return Optional.ofNullable(listener);
         }
 
         @Override
         public void onConsentStatusLoadFailure(Throwable error) {
-            if (listener != null) {
-                listener.onConsentStatusLoadFailure(error);
-            }
+            getListener().ifPresent(l -> l.onConsentStatusLoadFailure(error));
         }
     }
 }

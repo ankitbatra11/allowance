@@ -13,6 +13,7 @@ import com.google.ads.consent.ConsentStatus;
 
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.util.Optional;
 
 public class LegacyConsentFormLoader extends AbstractConsentFormLoader {
 
@@ -42,15 +43,31 @@ public class LegacyConsentFormLoader extends AbstractConsentFormLoader {
     }
 
     @Override
-    public void showConsentForm(ShowConsentFormRequest request) {
-        if (isFormLoaded() && !isFormShowing() && formListener != null) {
-            formListener.setShowConsentFormListener(new ShowConsentFormListener(request));
-            consentForm.show();
+    protected void invalidateCurrentForm() {
+        consentForm = null;
+        formListener = null;
+    }
+
+    @Override
+    protected void doShowConsentForm(ShowConsentFormRequest request) {
+        if (isFormLoaded() && !isFormShowing()) {
+            getFormListener().ifPresent(l -> {
+                l.setShowConsentFormListener(new ShowConsentFormListener(request));
+                getConsentForm().ifPresent(ConsentForm::show);
+            });
         }
     }
 
     private boolean isFormShowing() {
-        return consentForm != null && consentForm.isShowing();
+        return getConsentForm().map(ConsentForm::isShowing).orElse(false);
+    }
+
+    private Optional<FormListener> getFormListener() {
+        return Optional.ofNullable(formListener);
+    }
+
+    private Optional<ConsentForm> getConsentForm() {
+        return Optional.ofNullable(consentForm);
     }
 
     private static class FormListener extends ConsentFormListener {
@@ -116,22 +133,22 @@ public class LegacyConsentFormLoader extends AbstractConsentFormLoader {
         @Override
         public void onConsentFormLoaded() {
             super.onConsentFormLoaded();
-            response = new Response(consentStatusLoaderResponse, true);
-            if (loadConsentFormRequest.getFormLoaderListener() != null) {
-                loadConsentFormRequest.getFormLoaderListener().consentFormLoadedSuccessfully(response);
-            }
+            Response response = new Response(consentStatusLoaderResponse, true);
+            setResponse(response);
+            loadConsentFormRequest.getFormLoaderListener().ifPresent(listener -> listener.consentFormLoadedSuccessfully(response));
         }
 
         @Override
         public void onConsentFormError(String reason) {
             super.onConsentFormError(reason);
-            if (loadConsentFormRequest.getFormLoaderListener() != null) {
-                loadConsentFormRequest.getFormLoaderListener().loadingConsentFormFailed(new RuntimeException(reason));
-            }
+            loadConsentFormRequest.getFormLoaderListener().ifPresent(listener -> {
+                RuntimeException error = new RuntimeException(reason);
+                listener.loadingConsentFormFailed(error);
+            });
         }
     }
 
-    private class ShowConsentFormListener extends ConsentFormListener {
+    private static class ShowConsentFormListener extends ConsentFormListener {
 
         private final ShowConsentFormRequest request;
 
@@ -147,8 +164,6 @@ public class LegacyConsentFormLoader extends AbstractConsentFormLoader {
         @Override
         public void onConsentFormClosed(ConsentStatus consentStatus, Boolean userPrefersAdFree) {
             super.onConsentFormClosed(consentStatus, userPrefersAdFree);
-            response = null;
-            loadConsentForm(request);
             request.getConsentFormDismissListener().consentFormDismissedSuccessfully();
         }
     }

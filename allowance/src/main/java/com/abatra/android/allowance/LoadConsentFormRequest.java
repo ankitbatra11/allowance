@@ -5,6 +5,8 @@ import android.app.Activity;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
+import java.util.Optional;
+
 public class LoadConsentFormRequest extends LoadConsentStatusRequest {
 
     @Nullable
@@ -31,9 +33,8 @@ public class LoadConsentFormRequest extends LoadConsentStatusRequest {
         return privacyPolicyUrl;
     }
 
-    @Nullable
-    public ConsentFormLoader.Listener getFormLoaderListener() {
-        return formLoaderListener;
+    public Optional<ConsentFormLoader.Listener> getFormLoaderListener() {
+        return Optional.ofNullable(formLoaderListener);
     }
 
     @NonNull
