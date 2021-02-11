@@ -82,40 +82,40 @@ public class LegacyConsentFormLoader extends AbstractConsentFormLoader {
             this.loadConsentFormListener = loadConsentFormListener;
         }
 
+        private Optional<ConsentFormListener> getLoadConsentFormListener() {
+            return Optional.ofNullable(loadConsentFormListener);
+        }
+
         public void setShowConsentFormListener(@Nullable ConsentFormListener showConsentFormListener) {
             this.showConsentFormListener = showConsentFormListener;
+        }
+
+        private Optional<ConsentFormListener> getShowConsentFormListener() {
+            return Optional.ofNullable(showConsentFormListener);
         }
 
         @Override
         public void onConsentFormLoaded() {
             super.onConsentFormLoaded();
-            if (loadConsentFormListener != null) {
-                loadConsentFormListener.onConsentFormLoaded();
-            }
+            getLoadConsentFormListener().ifPresent(ConsentFormListener::onConsentFormLoaded);
         }
 
         @Override
         public void onConsentFormError(String reason) {
             super.onConsentFormError(reason);
-            if (loadConsentFormListener != null) {
-                loadConsentFormListener.onConsentFormError(reason);
-            }
+            getLoadConsentFormListener().ifPresent(l -> l.onConsentFormError(reason));
         }
 
         @Override
         public void onConsentFormOpened() {
             super.onConsentFormOpened();
-            if (showConsentFormListener != null) {
-                showConsentFormListener.onConsentFormOpened();
-            }
+            getShowConsentFormListener().ifPresent(ConsentFormListener::onConsentFormOpened);
         }
 
         @Override
         public void onConsentFormClosed(ConsentStatus consentStatus, Boolean userPrefersAdFree) {
             super.onConsentFormClosed(consentStatus, userPrefersAdFree);
-            if (showConsentFormListener != null) {
-                showConsentFormListener.onConsentFormClosed(consentStatus, userPrefersAdFree);
-            }
+            getShowConsentFormListener().ifPresent(l -> l.onConsentFormClosed(consentStatus, userPrefersAdFree));
         }
     }
 
