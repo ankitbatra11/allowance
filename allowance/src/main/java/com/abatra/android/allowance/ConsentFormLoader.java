@@ -8,7 +8,7 @@ public interface ConsentFormLoader extends LifecycleObserverObservable<ConsentFo
 
     void loadConsentFormIfConsentIsRequired(LoadConsentFormRequest request);
 
-    void loadConsentForm(LoadConsentFormRequest request);
+    void loadConsentFormIfConsentIsAcquired(LoadConsentFormRequest request);
 
     @Override
     default void addObserver(Listener observer) {

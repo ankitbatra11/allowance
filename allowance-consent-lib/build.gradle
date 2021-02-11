@@ -10,13 +10,17 @@ android {
     buildToolsVersion "30.0.0"
 
     defaultConfig {
+
         minSdkVersion 16
         targetSdkVersion 30
+
         versionCode 1
         versionName "1.0"
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         consumerProguardFiles "consumer-rules.pro"
+
+        multiDexEnabled true
     }
 
     buildTypes {
@@ -26,12 +30,15 @@ android {
         }
     }
     compileOptions {
+        coreLibraryDesugaringEnabled true
         sourceCompatibility JavaVersion.VERSION_1_8
         targetCompatibility JavaVersion.VERSION_1_8
     }
 }
 
 dependencies {
+
+    coreLibraryDesugaring 'com.android.tools:desugar_jdk_libs:1.1.1'
 
     api project(':allowance')
     api 'com.google.android.ads.consent:consent-library:1.0.8'

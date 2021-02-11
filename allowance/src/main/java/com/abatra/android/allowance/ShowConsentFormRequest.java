@@ -4,10 +4,14 @@ import android.app.Activity;
 
 public class ShowConsentFormRequest extends LoadConsentFormRequest {
 
-    private final ConsentFormDismissListener consentFormDismissListener;
+    private ConsentFormDismissListener consentFormDismissListener;
 
     public ShowConsentFormRequest(Activity activity, ConsentFormDismissListener consentFormDismissListener) {
         super(activity);
+        this.consentFormDismissListener = consentFormDismissListener;
+    }
+
+    public void setConsentFormDismissListener(ConsentFormDismissListener consentFormDismissListener) {
         this.consentFormDismissListener = consentFormDismissListener;
     }
 

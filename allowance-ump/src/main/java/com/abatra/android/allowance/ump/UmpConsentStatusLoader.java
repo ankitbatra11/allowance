@@ -23,9 +23,10 @@ public class UmpConsentStatusLoader extends AbstractConsentStatusLoader {
     protected void tryLoadingConsentStatus(LoadConsentStatusRequest loadConsentStatusRequest) {
 
         ConsentDebugSettings.Builder builder = new ConsentDebugSettings.Builder(context);
-        if (loadConsentStatusRequest.getDebugGeography() != null) {
-            builder.setDebugGeography(UmpConsentUtils.mapDebugGeography(loadConsentStatusRequest.getDebugGeography()));
-        }
+        loadConsentStatusRequest.getDebugGeography().ifPresent(dg -> {
+            int debugGeography = UmpConsentUtils.mapDebugGeography(dg);
+            builder.setDebugGeography(debugGeography);
+        });
         for (String testDevice : loadConsentStatusRequest.getTestDevices()) {
             builder.addTestDeviceHashedId(testDevice);
         }
@@ -40,16 +41,14 @@ public class UmpConsentStatusLoader extends AbstractConsentStatusLoader {
         consentInformation.requestConsentInfoUpdate(loadConsentStatusRequest.getActivity(), parameters,
                 () -> {
                     response = UmpConsentUtils.createResponse(consentInformation);
-                    if (loadConsentStatusRequest.getStatusLoaderListener() != null) {
-                        loadConsentStatusRequest.getStatusLoaderListener().loadedSuccessfully(response);
-                    }
+                    loadConsentStatusRequest.getStatusLoaderListener().ifPresent(l -> l.loadedSuccessfully(response));
                 },
                 formError -> {
                     UmpConsentUtils.report(formError, () -> "Requesting consent info update failed!");
-                    RuntimeException error = new RuntimeException(UmpConsentUtils.toString(formError));
-                    if (loadConsentStatusRequest.getStatusLoaderListener() != null) {
-                        loadConsentStatusRequest.getStatusLoaderListener().onConsentStatusLoadFailure(error);
-                    }
+                    loadConsentStatusRequest.getStatusLoaderListener().ifPresent(l -> {
+                        RuntimeException error = new RuntimeException(UmpConsentUtils.toString(formError));
+                        l.onConsentStatusLoadFailure(error);
+                    });
                 });
     }
 }
