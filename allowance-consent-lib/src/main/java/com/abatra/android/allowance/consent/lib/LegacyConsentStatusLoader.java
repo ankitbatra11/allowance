@@ -23,16 +23,21 @@ public class LegacyConsentStatusLoader extends AbstractConsentStatusLoader {
 
     @Override
     protected void tryLoadingConsentStatus(LoadConsentStatusRequest loadConsentStatusRequest) {
+
         ConsentInformation consentInformation = ConsentInformation.getInstance(context);
-        for (String testDevice : loadConsentStatusRequest.getTestDevices()) {
+
+        for (String testDevice : loadConsentStatusRequest.getConsentRequest().getTestDevices()) {
             consentInformation.addTestDevice(testDevice);
         }
-        loadConsentStatusRequest.getDebugGeography().ifPresent(dg -> {
+
+        loadConsentStatusRequest.getConsentRequest().getDebugGeography().ifPresent(dg -> {
             DebugGeography debugGeography = ConsentUtils.mapDebugGeography(dg);
             consentInformation.setDebugGeography(debugGeography);
         });
+
         Timber.d("loading consent status");
-        consentInformation.requestConsentInfoUpdate(loadConsentStatusRequest.getPublisherIds().toArray(new String[0]), new ConsentInfoUpdateListener() {
+        String[] publisherIds = loadConsentStatusRequest.getConsentRequest().getPublisherIds().toArray(new String[0]);
+        consentInformation.requestConsentInfoUpdate(publisherIds, new ConsentInfoUpdateListener() {
 
             @Override
             public void onConsentInfoUpdated(ConsentStatus consentStatus) {

@@ -37,7 +37,7 @@ abstract public class AbstractConsentFormLoader implements ConsentFormLoader {
 
     @Override
     public void loadConsentFormIfConsentIsRequired(LoadConsentFormRequest request) {
-        consentStatusLoader.loadConsentStatus(request.setStatusLoaderListener(new ConsentStatusLoader.Listener() {
+        loadConsentStatus(request, new ConsentStatusLoader.Listener() {
 
             @Override
             public void loadedSuccessfully(ConsentStatusLoaderResponse response) {
@@ -53,14 +53,19 @@ abstract public class AbstractConsentFormLoader implements ConsentFormLoader {
                 Timber.e(error, "Failed to load consent status!");
                 request.getFormLoaderListener().ifPresent(listener -> listener.loadingConsentFormFailed(error));
             }
-        }));
+        });
+    }
+
+    private void loadConsentStatus(LoadConsentFormRequest request, ConsentStatusLoader.Listener listener) {
+        LoadConsentStatusRequest statusRequest = new LoadConsentStatusRequest(request.getConsentRequest());
+        consentStatusLoader.loadConsentStatus(statusRequest.setStatusLoaderListener(listener));
     }
 
     protected abstract void tryLoadingConsentForm(LoadConsentFormRequest request, ConsentStatusLoaderResponse response) throws MalformedURLException;
 
     @Override
     public void loadConsentFormIfConsentIsAcquired(LoadConsentFormRequest request) {
-        consentStatusLoader.loadConsentStatus(request.setStatusLoaderListener(new ConsentStatusLoader.Listener() {
+        loadConsentStatus(request, new ConsentStatusLoader.Listener() {
 
             @Override
             public void loadedSuccessfully(ConsentStatusLoaderResponse response) {
@@ -76,7 +81,7 @@ abstract public class AbstractConsentFormLoader implements ConsentFormLoader {
             public void onConsentStatusLoadFailure(Throwable error) {
                 request.getFormLoaderListener().ifPresent(listener -> listener.loadingConsentFormFailed(error));
             }
-        }));
+        });
     }
 
     private void loadFormIfNotLoaded(LoadConsentFormRequest request, ConsentStatusLoaderResponse response) {
@@ -111,11 +116,11 @@ abstract public class AbstractConsentFormLoader implements ConsentFormLoader {
             public void consentFormDismissedSuccessfully() {
                 response = null;
                 invalidateCurrentForm();
-                consentStatusLoader.loadConsentStatus(request.setStatusLoaderListener(new ConsentStatusLoader.Listener() {
+                LoadConsentStatusRequest statusRequest = new LoadConsentStatusRequest(request.getConsentRequest());
+                consentStatusLoader.loadConsentStatus(statusRequest.setStatusLoaderListener(new ConsentStatusLoader.Listener() {
                     @Override
                     public void loadedSuccessfully(ConsentStatusLoaderResponse response) {
-                        request.setFormLoaderListener(null);
-                        loadConsentForm(request, response);
+                        loadConsentForm(new LoadConsentFormRequest(request.getConsentRequest()), response);
                     }
                 }));
                 request.getConsentFormDismissListener().consentFormDismissedSuccessfully();

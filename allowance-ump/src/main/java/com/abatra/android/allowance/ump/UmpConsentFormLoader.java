@@ -25,7 +25,7 @@ public class UmpConsentFormLoader extends AbstractConsentFormLoader implements C
     protected void tryLoadingConsentForm(LoadConsentFormRequest request,
                                          ConsentStatusLoaderResponse response) {
         if (response.isConsentFormAvailable()) {
-            UserMessagingPlatform.loadConsentForm(request.getActivity(),
+            UserMessagingPlatform.loadConsentForm(request.getConsentRequest().getActivity(),
                     consentForm -> {
                         this.consentForm = consentForm;
                         Response formLoadResponse = new Response(response, true);
@@ -46,7 +46,7 @@ public class UmpConsentFormLoader extends AbstractConsentFormLoader implements C
 
     @Override
     protected void doShowConsentForm(ShowConsentFormRequest request) {
-        getConsentForm().ifPresent(cf -> cf.show(request.getActivity(), formError -> {
+        getConsentForm().ifPresent(cf -> cf.show(request.getConsentRequest().getActivity(), formError -> {
             if (formError != null) {
                 RuntimeException error = new RuntimeException(UmpConsentUtils.toString(formError));
                 request.getConsentFormDismissListener().dismissingConsentFormFailed(error);

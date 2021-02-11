@@ -7,42 +7,33 @@ import androidx.annotation.Nullable;
 
 import java.util.Optional;
 
-public class LoadConsentFormRequest extends LoadConsentStatusRequest {
+public class LoadConsentFormRequest {
+
+    private final ConsentRequest consentRequest;
 
     @Nullable
     private ConsentFormLoader.Listener formLoaderListener;
 
-    @Nullable
-    private String privacyPolicyUrl;
+    public LoadConsentFormRequest(ConsentRequest consentRequest) {
+        this.consentRequest = consentRequest;
+    }
 
-    public LoadConsentFormRequest(Activity activity) {
-        super(activity);
+    public ConsentRequest getConsentRequest() {
+        return consentRequest;
     }
 
     public void setFormLoaderListener(@Nullable ConsentFormLoader.Listener formLoaderListener) {
         this.formLoaderListener = formLoaderListener;
     }
 
-    public LoadConsentFormRequest setPrivacyPolicyUrl(String privacyPolicyUrl) {
-        this.privacyPolicyUrl = privacyPolicyUrl;
-        return this;
-    }
-
-    @Nullable
-    public String getPrivacyPolicyUrl() {
-        return privacyPolicyUrl;
-    }
-
     public Optional<ConsentFormLoader.Listener> getFormLoaderListener() {
         return Optional.ofNullable(formLoaderListener);
     }
 
-    @NonNull
     @Override
     public String toString() {
         return "LoadConsentFormRequest{" +
-                "loadConsentStatusRequest='" + super.toString() + '\'' +
-                ", privacyPolicyUrl='" + privacyPolicyUrl + '\'' +
+                "consentRequest=" + consentRequest +
                 '}';
     }
 }

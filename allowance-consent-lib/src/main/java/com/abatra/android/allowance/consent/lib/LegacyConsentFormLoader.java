@@ -33,7 +33,8 @@ public class LegacyConsentFormLoader extends AbstractConsentFormLoader {
         formListener = new FormListener();
         formListener.setLoadConsentFormListener(new LoadConsentFormListener(request, response));
 
-        consentForm = new ConsentForm.Builder(lifecycleOwner.getContext(), new URL(request.getPrivacyPolicyUrl()))
+        String privacyPolicyUrl = request.getConsentRequest().getPrivacyPolicy().orElseThrow(IllegalArgumentException::new);
+        consentForm = new ConsentForm.Builder(lifecycleOwner.getContext(), new URL(privacyPolicyUrl))
                 .withListener(formListener)
                 .withNonPersonalizedAdsOption()
                 .withPersonalizedAdsOption()
