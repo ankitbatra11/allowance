@@ -38,7 +38,6 @@ public class LegacyConsentFormLoader extends AbstractConsentFormLoader {
                 .withListener(formListener)
                 .withNonPersonalizedAdsOption()
                 .withPersonalizedAdsOption()
-                .withAdFreeOption()
                 .build();
 
         consentForm.load();
