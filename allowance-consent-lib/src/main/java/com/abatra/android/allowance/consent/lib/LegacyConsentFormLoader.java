@@ -38,6 +38,7 @@ public class LegacyConsentFormLoader extends AbstractConsentFormLoader {
                 .withListener(formListener)
                 .withNonPersonalizedAdsOption()
                 .withPersonalizedAdsOption()
+                .withAdFreeOption()
                 .build();
 
         consentForm.load();
@@ -165,7 +166,8 @@ public class LegacyConsentFormLoader extends AbstractConsentFormLoader {
         @Override
         public void onConsentFormClosed(ConsentStatus consentStatus, Boolean userPrefersAdFree) {
             super.onConsentFormClosed(consentStatus, userPrefersAdFree);
-            request.getConsentFormDismissListener().consentFormDismissedSuccessfully();
+            boolean userPickedAdsFreeOption = Optional.ofNullable(userPrefersAdFree).orElse(false);
+            request.getConsentFormDismissListener().consentFormDismissedSuccessfully(userPickedAdsFreeOption);
         }
     }
 
