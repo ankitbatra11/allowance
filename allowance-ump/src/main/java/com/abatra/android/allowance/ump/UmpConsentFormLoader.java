@@ -51,7 +51,7 @@ public class UmpConsentFormLoader extends AbstractConsentFormLoader implements C
                 RuntimeException error = new RuntimeException(UmpConsentUtils.toString(formError));
                 request.getConsentFormDismissListener().dismissingConsentFormFailed(error);
             } else {
-                request.getConsentFormDismissListener().consentFormDismissedSuccessfully();
+                request.getConsentFormDismissListener().consentFormDismissedSuccessfully(false);
             }
         }));
     }
