@@ -111,12 +111,13 @@ abstract public class AbstractConsentFormLoader implements ConsentFormLoader {
     @Override
     public void showConsentForm(ShowConsentFormRequest request) {
         request.setConsentFormDismissListener(new ConsentFormDismissListener.Wrapper(request.getConsentFormDismissListener()) {
+
             @Override
-            public void consentFormDismissedSuccessfully() {
+            public void consentFormDismissedSuccessfully(boolean userPickedAdsFreeOption) {
                 response = null;
                 invalidateCurrentForm();
                 loadConsentForm(request);
-                super.consentFormDismissedSuccessfully();
+                super.consentFormDismissedSuccessfully(userPickedAdsFreeOption);
             }
         });
         doShowConsentForm(request);
