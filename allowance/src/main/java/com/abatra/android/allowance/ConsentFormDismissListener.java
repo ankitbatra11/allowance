@@ -2,7 +2,7 @@ package com.abatra.android.allowance;
 
 public interface ConsentFormDismissListener {
 
-    default void consentFormDismissedSuccessfully() {
+    default void consentFormDismissedSuccessfully(boolean userPickedAdsFreeOption) {
     }
 
     default void dismissingConsentFormFailed(Throwable error) {
@@ -17,8 +17,8 @@ public interface ConsentFormDismissListener {
         }
 
         @Override
-        public void consentFormDismissedSuccessfully() {
-            listener.consentFormDismissedSuccessfully();
+        public void consentFormDismissedSuccessfully(boolean userPickedAdsFreeOption) {
+            listener.consentFormDismissedSuccessfully(userPickedAdsFreeOption);
         }
 
         @Override
