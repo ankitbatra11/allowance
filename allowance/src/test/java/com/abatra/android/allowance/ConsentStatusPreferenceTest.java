@@ -46,7 +46,6 @@ public class ConsentStatusPreferenceTest {
         assertThat(preference.getConsent(), notNullValue());
         assertThat(preference.getConsent().getConsentType(), equalTo(response.getConsentType()));
         assertThat(preference.getConsent().getConsentStatusType(), equalTo(response.getConsentStatusType()));
-
     }
 
     @Test
