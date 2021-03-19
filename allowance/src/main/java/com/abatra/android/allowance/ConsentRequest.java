@@ -9,6 +9,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
+import static com.google.common.base.Preconditions.checkNotNull;
+
 public class ConsentRequest {
 
     private final Activity activity;
@@ -20,7 +22,7 @@ public class ConsentRequest {
     private String privacyPolicy;
 
     public ConsentRequest(Activity activity) {
-        this.activity = activity;
+        this.activity = checkNotNull(activity, "Must provide an activity");
     }
 
     public ConsentRequest addPublisherId(String publisherId) {

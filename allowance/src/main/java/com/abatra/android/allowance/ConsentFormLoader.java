@@ -12,12 +12,10 @@ public interface ConsentFormLoader extends LifecycleObserverObservable<ConsentFo
 
     @Override
     default void addObserver(Listener observer) {
-
     }
 
     @Override
     default void removeObserver(Listener observer) {
-
     }
 
     class Response {

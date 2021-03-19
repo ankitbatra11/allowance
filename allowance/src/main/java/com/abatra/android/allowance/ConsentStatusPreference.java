@@ -5,15 +5,20 @@ import android.content.SharedPreferences;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 
+import java.util.concurrent.Executor;
+
 import bolts.Task;
 import timber.log.Timber;
 
+import static com.abatra.android.wheelie.thread.SaferTask.callOn;
+
 public class ConsentStatusPreference implements ConsentStatusStore {
 
-    private static final String PREF_KEY = "pref_consent_status_json";
+    static final String PREF_KEY = "pref_consent_status_json";
 
     private final SharedPreferences preferences;
     private final Gson gson;
+    Executor executor = Task.BACKGROUND_EXECUTOR;
 
     private ConsentStatusPreference(SharedPreferences preferences, Gson gson) {
         this.preferences = preferences;
@@ -28,7 +33,7 @@ public class ConsentStatusPreference implements ConsentStatusStore {
 
     @Override
     public void loadedSuccessfully(ConsentStatusLoaderResponse response) {
-        Task.callInBackground(() -> {
+        callOn(executor, () -> {
             String value = gson.toJson(response);
             preferences.edit().putString(PREF_KEY, value).apply();
             Timber.d("saved consent=%s json=%s", response, value);
