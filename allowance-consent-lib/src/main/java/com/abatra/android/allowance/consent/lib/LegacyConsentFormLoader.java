@@ -15,6 +15,8 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.Optional;
 
+import timber.log.Timber;
+
 public class LegacyConsentFormLoader extends AbstractConsentFormLoader {
 
     @Nullable
@@ -103,6 +105,7 @@ public class LegacyConsentFormLoader extends AbstractConsentFormLoader {
 
         @Override
         public void onConsentFormError(String reason) {
+            Timber.e(new RuntimeException("Error in loading consent form. Reason=" + reason));
             super.onConsentFormError(reason);
             getLoadConsentFormListener().ifPresent(l -> l.onConsentFormError(reason));
         }
@@ -158,8 +161,9 @@ public class LegacyConsentFormLoader extends AbstractConsentFormLoader {
         }
 
         @Override
-        public void onConsentFormOpened() {
-            super.onConsentFormOpened();
+        public void onConsentFormError(String reason) {
+            Timber.e(new RuntimeException("Error in show consent form. Reason=" + reason));
+            super.onConsentFormError(reason);
         }
 
         @Override

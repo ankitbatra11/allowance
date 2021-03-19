@@ -1,5 +1,6 @@
 package com.abatra.android.allowance;
 
+import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
 import java.util.Optional;
@@ -27,6 +28,7 @@ public class LoadConsentFormRequest {
         return Optional.ofNullable(formLoaderListener);
     }
 
+    @NonNull
     @Override
     public String toString() {
         return "LoadConsentFormRequest{" +

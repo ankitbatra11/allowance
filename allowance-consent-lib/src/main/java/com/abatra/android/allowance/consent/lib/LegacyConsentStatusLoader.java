@@ -50,6 +50,7 @@ public class LegacyConsentStatusLoader extends AbstractConsentStatusLoader {
                 Timber.e("onFailedToUpdateConsentInfo errorDescription=%s", errorDescription);
                 loadConsentStatusRequest.getStatusLoaderListener().ifPresent(l -> {
                     RuntimeException error = new RuntimeException(errorDescription);
+                    Timber.e(error);
                     l.onConsentStatusLoadFailure(error);
                 });
             }
