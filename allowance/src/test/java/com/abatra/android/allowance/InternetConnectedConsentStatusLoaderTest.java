@@ -1,5 +1,6 @@
 package com.abatra.android.allowance;
 
+import com.abatra.android.wheelie.lifecycle.ILifecycleOwner;
 import com.abatra.android.wheelie.network.InternetConnectionObserver;
 
 import org.junit.Before;
@@ -34,6 +35,9 @@ public class InternetConnectedConsentStatusLoaderTest {
     @Mock
     private ConsentStatusLoader.Listener mockedListener;
 
+    @Mock
+    private ILifecycleOwner mockedLifecycleOwner;
+
     @Before
     public void setup() {
         when(mockedLoadConsentStatusRequest.getStatusLoaderListener()).thenReturn(Optional.of(mockedListener));
@@ -57,5 +61,14 @@ public class InternetConnectedConsentStatusLoaderTest {
         internetConnectedConsentStatusLoader.loadConsentStatus(mockedLoadConsentStatusRequest);
 
         verify(mockedListener, times(1)).onConsentStatusLoadFailure(any(RuntimeException.class));
+    }
+
+    @Test
+    public void test_observeLifecycle() {
+
+        internetConnectedConsentStatusLoader.observeLifecycle(mockedLifecycleOwner);
+
+        verify(mockedConsentStatusLoader, times(1)).observeLifecycle(mockedLifecycleOwner);
+        verify(mockedInternetConnectionObserver, times(1)).observeLifecycle(mockedLifecycleOwner);
     }
 }

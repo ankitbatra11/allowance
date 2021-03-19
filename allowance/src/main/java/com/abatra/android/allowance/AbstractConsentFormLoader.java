@@ -50,7 +50,6 @@ abstract public class AbstractConsentFormLoader implements ConsentFormLoader {
 
             @Override
             public void onConsentStatusLoadFailure(Throwable error) {
-                Timber.e(error, "Failed to load consent status!");
                 request.getFormLoaderListener().ifPresent(listener -> listener.loadingConsentFormFailed(error));
             }
         });

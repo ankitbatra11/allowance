@@ -4,6 +4,8 @@ import androidx.annotation.Nullable;
 
 import java.util.Optional;
 
+import timber.log.Timber;
+
 abstract public class AbstractConsentStatusLoader implements ConsentStatusLoader {
 
     private final ConsentStatusStore consentStatusStore;
@@ -32,6 +34,7 @@ abstract public class AbstractConsentStatusLoader implements ConsentStatusLoader
         try {
             tryLoadingConsentStatus(request.setStatusLoaderListener(statusLoaderListener));
         } catch (Throwable error) {
+            Timber.e(error);
             statusLoaderListener.onConsentStatusLoadFailure(error);
         }
     }
