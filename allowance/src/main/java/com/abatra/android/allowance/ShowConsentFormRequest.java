@@ -1,5 +1,7 @@
 package com.abatra.android.allowance;
 
+import androidx.annotation.NonNull;
+
 public class ShowConsentFormRequest {
 
     private final ConsentRequest consentRequest;
@@ -22,6 +24,7 @@ public class ShowConsentFormRequest {
         return consentFormDismissListener;
     }
 
+    @NonNull
     @Override
     public String toString() {
         return "ShowConsentFormRequest{" +
