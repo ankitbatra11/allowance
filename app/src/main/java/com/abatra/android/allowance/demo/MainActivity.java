@@ -7,16 +7,15 @@ import android.view.LayoutInflater;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.abatra.android.allowance.Consent;
-import com.abatra.android.allowance.DebugGeography;
 import com.abatra.android.allowance.IConsentForm;
-import com.abatra.android.allowance.consent.lib.ConsentLibConsentFormLoadRequest;
 import com.abatra.android.allowance.consent.lib.ConsentLibConsentFormRepository;
-import com.abatra.android.allowance.consent.lib.ConsentLibConsentLoadRequest;
 import com.abatra.android.allowance.consent.lib.ConsentLibConsentRepository;
 import com.abatra.android.allowance.demo.databinding.ActivityMainBinding;
 import com.abatra.android.wheelie.lifecycle.Resource;
 
 import timber.log.Timber;
+
+import static com.abatra.android.allowance.demo.Utils.createFormLoadRequest;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -36,17 +35,12 @@ public class MainActivity extends AppCompatActivity {
 
         consentRepository = new ConsentLibConsentRepository(getApplicationContext());
         consentFormRepository = new ConsentLibConsentFormRepository(consentRepository);
+        getLifecycle().addObserver(consentFormRepository);
 
-        consentFormRepository.getConsentFormResourceLiveData().observe(this, booleanResource -> {
+        consentFormRepository.loadConsentForm(createFormLoadRequest(this, Consent.Status.required())).observe(this, booleanResource -> {
             if (booleanResource.getStatus() == Resource.Status.LOADED) {
                 consentFormRepository.getLoadedConsentForm().ifPresent(IConsentForm::show);
             }
         });
-
-        consentFormRepository.loadConsentForm(new ConsentLibConsentFormLoadRequest(Constants.CONSENT_LOAD_REQUEST,
-                Consent.Status.required(),
-                this,
-                "http://www.this.app.com/privacyPolicy"));
-
     }
 }

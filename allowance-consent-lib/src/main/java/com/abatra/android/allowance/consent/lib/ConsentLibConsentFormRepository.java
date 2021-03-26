@@ -1,19 +1,19 @@
 package com.abatra.android.allowance.consent.lib;
 
 import com.abatra.android.allowance.AbstractConsentFormRepository;
+import com.abatra.android.allowance.Consent;
 import com.abatra.android.allowance.ConsentFormLoadRequest;
 import com.abatra.android.allowance.ConsentRepository;
 import com.google.ads.consent.ConsentForm;
 import com.google.ads.consent.ConsentFormListener;
 import com.google.ads.consent.ConsentStatus;
 
-import java.lang.ref.WeakReference;
 import java.net.MalformedURLException;
 import java.net.URL;
 
 import timber.log.Timber;
 
-import static com.abatra.android.allowance.consent.lib.ConsentUtils.*;
+import static com.abatra.android.allowance.consent.lib.ConsentLibUtils.createConsent;
 
 public class ConsentLibConsentFormRepository extends AbstractConsentFormRepository {
 
@@ -33,22 +33,27 @@ public class ConsentLibConsentFormRepository extends AbstractConsentFormReposito
                     public void onConsentFormLoaded() {
                         super.onConsentFormLoaded();
                         Timber.d("onConsentFormLoaded");
-                        ConsentLibConsentFormRepository.this.consentForm.setResourceValue(true);
+                        ConsentLibConsentFormRepository.this.consentFormResource.setResourceValue(true);
                     }
 
                     @Override
                     public void onConsentFormError(String reason) {
                         super.onConsentFormError(reason);
                         Timber.e("onConsentFormError reason=%s", reason);
-                        ConsentLibConsentFormRepository.this.consentForm.setError(new RuntimeException(reason));
+                        ConsentLibConsentFormRepository.this.consentFormResource.setError(new RuntimeException(reason));
                     }
 
                     @Override
                     public void onConsentFormClosed(ConsentStatus consentStatus, Boolean userPrefersAdFree) {
                         super.onConsentFormClosed(consentStatus, userPrefersAdFree);
+
                         Timber.i("onConsentFormClosed consentStatus=%s userPrefersAdFree=%b", consentStatus, userPrefersAdFree);
-                        consentRepository.upsert(createConsent(consentStatus));
-                        weakConsentForm = null;
+
+                        ConsentLibConsentFormRepository.this.consentForm = null;
+
+                        Consent consent = createConsent(consentStatus);
+                        consentRepository.upsert(consent);
+
                         if (loadRequest.isLoadFormOnClose()) {
                             loadConsentForm(consentFormLoadRequest);
                         }
@@ -58,7 +63,8 @@ public class ConsentLibConsentFormRepository extends AbstractConsentFormReposito
                 .withPersonalizedAdsOption()
                 .build();
 
-        weakConsentForm = new WeakReference<>(new ConsentLibConsentForm(consentForm));
+        ConsentLibConsentFormRepository.this.consentForm = new ConsentLibConsentForm(consentForm);
+
         consentForm.load();
     }
 

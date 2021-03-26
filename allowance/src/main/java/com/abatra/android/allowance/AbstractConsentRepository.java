@@ -10,12 +10,14 @@ public abstract class AbstractConsentRepository implements ConsentRepository {
     protected final ResourceMutableLiveData<Consent> consentStatus = new ResourceMutableLiveData<>();
 
     @Override
-    public LiveData<Resource<Consent>> getConsentStatusResourceLiveData() {
+    public LiveData<Resource<Consent>> loadConsentStatus(ConsentLoadRequest consentLoadRequest) {
+        if (consentStatus.getValue() == null) {
+            loadConsentStatusInternal(consentLoadRequest);
+        }
         return consentStatus;
     }
 
-    @Override
-    public void loadConsentStatus(ConsentLoadRequest consentLoadRequest) {
+    private void loadConsentStatusInternal(ConsentLoadRequest consentLoadRequest) {
         consentStatus.setLoading();
         try {
             tryLoadingConsentStatus(consentLoadRequest);
