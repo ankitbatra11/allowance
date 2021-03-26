@@ -1,3 +1,5 @@
 <resources>
     <string name="app_name">Allowance Demo</string>
+    <string name="show_consent_form">Show consent form</string>
+    <string name="settings">Settings</string>
 </resources>
