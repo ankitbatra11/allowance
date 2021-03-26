@@ -3,9 +3,7 @@ package com.abatra.android.allowance.consent.lib;
 import android.content.Context;
 
 import com.abatra.android.allowance.AbstractConsentRepository;
-import com.abatra.android.allowance.Consent;
 import com.abatra.android.allowance.ConsentLoadRequest;
-import com.abatra.android.allowance.ConsentType;
 import com.google.ads.consent.ConsentInfoUpdateListener;
 import com.google.ads.consent.ConsentInformation;
 import com.google.ads.consent.ConsentStatus;
@@ -13,7 +11,7 @@ import com.google.ads.consent.DebugGeography;
 
 import timber.log.Timber;
 
-import static com.abatra.android.allowance.consent.lib.ConsentUtils.createConsent;
+import static com.abatra.android.allowance.consent.lib.ConsentLibUtils.createConsent;
 
 public class ConsentLibConsentRepository extends AbstractConsentRepository {
 
@@ -35,7 +33,7 @@ public class ConsentLibConsentRepository extends AbstractConsentRepository {
         }
 
         loadRequest.getDebugGeography().ifPresent(dg -> {
-            DebugGeography debugGeography = ConsentUtils.mapDebugGeography(dg);
+            DebugGeography debugGeography = ConsentLibUtils.mapDebugGeography(dg);
             consentInformation.setDebugGeography(debugGeography);
         });
 

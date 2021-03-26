@@ -6,71 +6,78 @@ import androidx.lifecycle.LiveData;
 import com.abatra.android.wheelie.lifecycle.Resource;
 import com.abatra.android.wheelie.lifecycle.ResourceMediatorLiveData;
 
-import java.lang.ref.Reference;
-import java.lang.ref.WeakReference;
 import java.util.Optional;
 
 import timber.log.Timber;
 
 public abstract class AbstractConsentFormRepository implements ConsentFormRepository {
 
-    protected final ResourceMediatorLiveData<Boolean> consentForm = new ResourceMediatorLiveData<>();
+    protected final ResourceMediatorLiveData<Boolean> consentFormResource = new ResourceMediatorLiveData<>();
 
     protected final ConsentRepository consentRepository;
+
     @Nullable
-    private WeakReference<ConsentFormLoadRequest> weakFormLoadRequest;
+    protected ConsentFormLoadRequest consentFormLoadRequest;
+
     @Nullable
-    protected WeakReference<IConsentForm> weakConsentForm;
+    protected IConsentForm consentForm;
 
     protected AbstractConsentFormRepository(ConsentRepository consentRepository) {
         this.consentRepository = consentRepository;
     }
 
     @Override
-    public LiveData<Resource<Boolean>> getConsentFormResourceLiveData() {
-        if (consentForm.getValue() == null) {
-            consentForm.addSource(consentRepository.getConsentStatusResourceLiveData(), this::onConsentUpdated);
-        }
-        return consentForm;
+    public LiveData<Resource<Boolean>> loadConsentForm(ConsentFormLoadRequest consentFormLoadRequest) {
+
+        this.consentFormLoadRequest = consentFormLoadRequest;
+
+        ConsentLoadRequest consentLoadRequest = consentFormLoadRequest.getConsentLoadRequest();
+        consentFormResource.removeSource(consentRepository.loadConsentStatus(consentLoadRequest));
+        consentFormResource.addSource(consentRepository.loadConsentStatus(consentLoadRequest), this::checkConsentAndLoadForm);
+        consentFormResource.setLoading();
+
+        return consentFormResource;
     }
 
-    private void onConsentUpdated(Resource<Consent> consentResource) {
+    private void checkConsentAndLoadForm(Resource<Consent> consentResource) {
 
-        Optional<ConsentFormLoadRequest> consentFormLoadRequest = Optional.ofNullable(weakFormLoadRequest).map(Reference::get);
-        boolean meetsCriteria = consentFormLoadRequest
+        boolean meetsCriteria = getConsentFormLoadRequest()
                 .map(ConsentFormLoadRequest::getRequiredConsentStatuses)
                 .map(reqStatus -> consentResource.getStatus() == Resource.Status.LOADED && reqStatus.contains(consentResource.getData().getStatus()))
                 .orElse(false);
 
         if (meetsCriteria) {
-            withRequiredConsentLoadConsentForm(weakFormLoadRequest.get());
+            withRequiredConsentLoadConsentForm(consentFormLoadRequest);
         } else {
-            consentForm.setError(new RuntimeException("Does not meet consent status criteria in req=" + consentFormLoadRequest));
+            consentFormResource.setError(new RuntimeException("Does not meet consent status criteria in req=" + consentFormLoadRequest));
         }
-        Timber.d("consentResource=%s weakFormLoadRequest=%s meetsCriteria=%b",
-                consentResource, weakFormLoadRequest, meetsCriteria);
+        Timber.d("consentResource=%s consentFormLoadRequest=%s meetsCriteria=%b",
+                consentResource, consentFormLoadRequest, meetsCriteria);
+    }
+
+    private Optional<ConsentFormLoadRequest> getConsentFormLoadRequest() {
+        return Optional.ofNullable(consentFormLoadRequest);
     }
 
     private void withRequiredConsentLoadConsentForm(ConsentFormLoadRequest formLoadRequest) {
         try {
             tryLoadingConsentForm(formLoadRequest);
         } catch (Throwable error) {
-            consentForm.setError(error);
+            consentFormResource.setError(error);
         }
-    }
-
-    @Override
-    public void loadConsentForm(ConsentFormLoadRequest consentFormLoadRequest) {
-        weakFormLoadRequest = new WeakReference<>(consentFormLoadRequest);
-        consentForm.setLoading();
-        consentRepository.loadConsentStatus(consentFormLoadRequest.getConsentLoadRequest());
     }
 
     protected abstract void tryLoadingConsentForm(ConsentFormLoadRequest consentFormLoadRequest);
 
     @Override
     public Optional<IConsentForm> getLoadedConsentForm() {
-        return Optional.ofNullable(weakConsentForm)
-                .map(WeakReference::get);
+        return Optional.ofNullable(consentForm);
+    }
+
+    @Override
+    public void onDestroy() {
+        Timber.i("onDestroy");
+        consentForm = null;
+        consentFormLoadRequest = null;
     }
 }

@@ -14,6 +14,8 @@ import com.abatra.android.allowance.consent.lib.ConsentLibConsentFormRepository;
 import com.abatra.android.allowance.consent.lib.ConsentLibConsentRepository;
 import com.abatra.android.allowance.demo.databinding.ActivitySettingsBinding;
 
+import static com.abatra.android.allowance.demo.Utils.createFormLoadRequest;
+
 public class SettingsActivity extends AppCompatActivity {
 
     ConsentLibConsentRepository consentRepository;
@@ -28,8 +30,11 @@ public class SettingsActivity extends AppCompatActivity {
 
         consentRepository = new ConsentLibConsentRepository(getApplicationContext());
         consentFormRepository = new ConsentLibConsentFormRepository(consentRepository);
+        getLifecycle().addObserver(consentFormRepository);
 
-        consentFormRepository.getConsentFormResourceLiveData().observe(this, booleanResource -> {
+        ConsentLibConsentFormLoadRequest formLoadRequest = createFormLoadRequest(this, Consent.Status.obtained());
+        formLoadRequest.setLoadFormOnClose(true);
+        consentFormRepository.loadConsentForm(formLoadRequest).observe(this, booleanResource -> {
             switch (booleanResource.getStatus()) {
                 case LOADING:
                     binding.buttonShowConsentForm.setVisibility(View.INVISIBLE);
@@ -39,20 +44,8 @@ public class SettingsActivity extends AppCompatActivity {
                     binding.buttonShowConsentForm.setVisibility(View.VISIBLE);
                     binding.progressLoadingConsentForm.setVisibility(View.INVISIBLE);
                     break;
-                case FAILED:
-                    break;
             }
         });
-
-        ConsentLibConsentFormLoadRequest consentFormLoadRequest = new ConsentLibConsentFormLoadRequest(
-                Constants.CONSENT_LOAD_REQUEST,
-                Consent.Status.obtained(),
-                this,
-                "http://www.this.app.com/privacyPolicy");
-
-        consentFormLoadRequest.setLoadFormOnClose(true);
-        consentFormRepository.loadConsentForm(consentFormLoadRequest);
-
         binding.buttonShowConsentForm.setOnClickListener(v -> consentFormRepository.getLoadedConsentForm().ifPresent(IConsentForm::show));
     }
 }
