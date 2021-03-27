@@ -5,31 +5,28 @@ import androidx.lifecycle.LiveData;
 import com.abatra.android.wheelie.lifecycle.Resource;
 import com.abatra.android.wheelie.lifecycle.ResourceMutableLiveData;
 
-public abstract class AbstractConsentRepository implements ConsentRepository {
+import timber.log.Timber;
 
-    protected final ResourceMutableLiveData<Consent> consentStatus = new ResourceMutableLiveData<>();
+public abstract class AbstractConsentRepository implements ConsentRepository {
 
     @Override
     public LiveData<Resource<Consent>> loadConsentStatus(ConsentLoadRequest consentLoadRequest) {
-        if (consentStatus.getValue() == null) {
-            loadConsentStatusInternal(consentLoadRequest);
-        }
-        return consentStatus;
+        ResourceMutableLiveData<Consent> result = new ResourceMutableLiveData<>();
+        loadConsentStatusInternal(consentLoadRequest, result);
+        return result;
     }
 
-    private void loadConsentStatusInternal(ConsentLoadRequest consentLoadRequest) {
-        consentStatus.setLoading();
+    private void loadConsentStatusInternal(ConsentLoadRequest consentLoadRequest,
+                                           ResourceMutableLiveData<Consent> result) {
+        result.setLoading();
         try {
-            tryLoadingConsentStatus(consentLoadRequest);
+            tryLoadingConsentStatus(consentLoadRequest, result);
         } catch (Throwable error) {
-            consentStatus.setError(error);
+            Timber.e(error);
+            result.setError(error);
         }
     }
 
-    protected abstract void tryLoadingConsentStatus(ConsentLoadRequest consentLoadRequest);
-
-    @Override
-    public void upsert(Consent consent) {
-        consentStatus.setResourceValue(consent);
-    }
+    protected abstract void tryLoadingConsentStatus(ConsentLoadRequest consentLoadRequest,
+                                                    ResourceMutableLiveData<Consent> result);
 }

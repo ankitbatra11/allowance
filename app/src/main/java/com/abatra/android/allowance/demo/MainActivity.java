@@ -7,6 +7,7 @@ import android.view.LayoutInflater;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.abatra.android.allowance.Consent;
+import com.abatra.android.allowance.ConsentFormCallback;
 import com.abatra.android.allowance.IConsentForm;
 import com.abatra.android.allowance.consent.lib.ConsentLibConsentFormRepository;
 import com.abatra.android.allowance.consent.lib.ConsentLibConsentRepository;
@@ -39,7 +40,8 @@ public class MainActivity extends AppCompatActivity {
 
         consentFormRepository.loadConsentForm(createFormLoadRequest(this, Consent.Status.required())).observe(this, booleanResource -> {
             if (booleanResource.getStatus() == Resource.Status.LOADED) {
-                consentFormRepository.getLoadedConsentForm().ifPresent(IConsentForm::show);
+                consentFormRepository.showConsentForm((consent, userPrefersAdFreeOption) -> {
+                });
             }
         });
     }

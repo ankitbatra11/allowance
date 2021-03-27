@@ -3,7 +3,9 @@ package com.abatra.android.allowance.consent.lib;
 import android.content.Context;
 
 import com.abatra.android.allowance.AbstractConsentRepository;
+import com.abatra.android.allowance.Consent;
 import com.abatra.android.allowance.ConsentLoadRequest;
+import com.abatra.android.wheelie.lifecycle.ResourceMutableLiveData;
 import com.google.ads.consent.ConsentInfoUpdateListener;
 import com.google.ads.consent.ConsentInformation;
 import com.google.ads.consent.ConsentStatus;
@@ -22,7 +24,7 @@ public class ConsentLibConsentRepository extends AbstractConsentRepository {
     }
 
     @Override
-    protected void tryLoadingConsentStatus(ConsentLoadRequest consentLoadRequest) {
+    protected void tryLoadingConsentStatus(ConsentLoadRequest consentLoadRequest, ResourceMutableLiveData<Consent> result) {
 
         ConsentLibConsentLoadRequest loadRequest = (ConsentLibConsentLoadRequest) consentLoadRequest;
 
@@ -46,17 +48,17 @@ public class ConsentLibConsentRepository extends AbstractConsentRepository {
             public void onConsentInfoUpdated(ConsentStatus consentStatus) {
                 Timber.d("onConsentInfoUpdated consentStatus=%s", consentStatus);
                 try {
-                    ConsentLibConsentRepository.this.consentStatus.setResourceValue(createConsent(consentStatus));
+                    result.postResourceValue(createConsent(consentStatus));
                 } catch (Throwable error) {
                     Timber.e(error);
-                    ConsentLibConsentRepository.this.consentStatus.setError(error);
+                    result.postError(error);
                 }
             }
 
             @Override
             public void onFailedToUpdateConsentInfo(String errorDescription) {
                 Timber.e("onFailedToUpdateConsentInfo errorDescription=%s", errorDescription);
-                ConsentLibConsentRepository.this.consentStatus.setError(new RuntimeException(errorDescription));
+                result.postError(new RuntimeException(errorDescription));
             }
         });
     }
