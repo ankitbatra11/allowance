@@ -8,7 +8,6 @@ import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.abatra.android.allowance.Consent;
-import com.abatra.android.allowance.IConsentForm;
 import com.abatra.android.allowance.consent.lib.ConsentLibConsentFormLoadRequest;
 import com.abatra.android.allowance.consent.lib.ConsentLibConsentFormRepository;
 import com.abatra.android.allowance.consent.lib.ConsentLibConsentRepository;
@@ -46,6 +45,7 @@ public class SettingsActivity extends AppCompatActivity {
                     break;
             }
         });
-        binding.buttonShowConsentForm.setOnClickListener(v -> consentFormRepository.getLoadedConsentForm().ifPresent(IConsentForm::show));
+        binding.buttonShowConsentForm.setOnClickListener(v -> consentFormRepository.showConsentForm((consent, userPrefersAdFreeOption) -> {
+        }));
     }
 }
