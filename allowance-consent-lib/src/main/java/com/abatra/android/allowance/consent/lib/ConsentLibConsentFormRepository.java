@@ -19,9 +19,9 @@ import java.util.Optional;
 
 import timber.log.Timber;
 
-import static com.abatra.android.allowance.consent.lib.ConsentLibUtils.createConsent;
-
 public class ConsentLibConsentFormRepository extends AbstractConsentFormRepository {
+
+    private final ConsentFactory consentFactory;
 
     @Nullable
     private ConsentForm consentForm;
@@ -29,8 +29,9 @@ public class ConsentLibConsentFormRepository extends AbstractConsentFormReposito
     @Nullable
     private LiveDataConsentFormListener consentFormListener;
 
-    public ConsentLibConsentFormRepository(ConsentRepository consentRepository) {
+    public ConsentLibConsentFormRepository(ConsentRepository consentRepository, ConsentFactory consentFactory) {
         super(consentRepository);
+        this.consentFactory = consentFactory;
     }
 
     @Override
@@ -105,7 +106,7 @@ public class ConsentLibConsentFormRepository extends AbstractConsentFormReposito
 
             Timber.i("consent=%s userPrefersAdFreeOption=%b", consentStatus, userPrefersAdFree);
 
-            Consent consent = createConsent(consentStatus);
+            Consent consent = consentFactory.createConsent(consentStatus);
 
             if (isLoadFormOnClose()) {
 

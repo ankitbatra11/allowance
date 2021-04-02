@@ -13,14 +13,14 @@ import com.google.ads.consent.DebugGeography;
 
 import timber.log.Timber;
 
-import static com.abatra.android.allowance.consent.lib.ConsentLibUtils.createConsent;
-
 public class ConsentLibConsentRepository extends AbstractConsentRepository {
 
     private final Context context;
+    private final ConsentFactory consentFactory;
 
-    public ConsentLibConsentRepository(Context context) {
+    public ConsentLibConsentRepository(Context context, ConsentFactory consentFactory) {
         this.context = context;
+        this.consentFactory = consentFactory;
     }
 
     @Override
@@ -48,7 +48,7 @@ public class ConsentLibConsentRepository extends AbstractConsentRepository {
             public void onConsentInfoUpdated(ConsentStatus consentStatus) {
                 Timber.d("onConsentInfoUpdated consentStatus=%s", consentStatus);
                 try {
-                    result.postResourceValue(createConsent(consentStatus));
+                    result.postResourceValue(consentFactory.createConsent(consentStatus));
                 } catch (Throwable error) {
                     Timber.e(error);
                     result.postError(error);

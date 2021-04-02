@@ -7,8 +7,7 @@ import android.view.LayoutInflater;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.abatra.android.allowance.Consent;
-import com.abatra.android.allowance.ConsentFormCallback;
-import com.abatra.android.allowance.IConsentForm;
+import com.abatra.android.allowance.consent.lib.ConsentFactory;
 import com.abatra.android.allowance.consent.lib.ConsentLibConsentFormRepository;
 import com.abatra.android.allowance.consent.lib.ConsentLibConsentRepository;
 import com.abatra.android.allowance.demo.databinding.ActivityMainBinding;
@@ -34,8 +33,9 @@ public class MainActivity extends AppCompatActivity {
 
         binding.buttonSettings.setOnClickListener(v -> startActivity(new Intent(v.getContext(), SettingsActivity.class)));
 
-        consentRepository = new ConsentLibConsentRepository(getApplicationContext());
-        consentFormRepository = new ConsentLibConsentFormRepository(consentRepository);
+        ConsentFactory consentFactory = new ConsentFactory(this);
+        consentRepository = new ConsentLibConsentRepository(getApplicationContext(), consentFactory);
+        consentFormRepository = new ConsentLibConsentFormRepository(consentRepository, consentFactory);
         getLifecycle().addObserver(consentFormRepository);
 
         consentFormRepository.loadConsentForm(createFormLoadRequest(this, Consent.Status.required())).observe(this, booleanResource -> {
