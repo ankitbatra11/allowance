@@ -8,6 +8,7 @@ import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.abatra.android.allowance.Consent;
+import com.abatra.android.allowance.consent.lib.ConsentFactory;
 import com.abatra.android.allowance.consent.lib.ConsentLibConsentFormLoadRequest;
 import com.abatra.android.allowance.consent.lib.ConsentLibConsentFormRepository;
 import com.abatra.android.allowance.consent.lib.ConsentLibConsentRepository;
@@ -27,8 +28,9 @@ public class SettingsActivity extends AppCompatActivity {
         ActivitySettingsBinding binding = ActivitySettingsBinding.inflate(LayoutInflater.from(this));
         setContentView(binding.getRoot());
 
-        consentRepository = new ConsentLibConsentRepository(getApplicationContext());
-        consentFormRepository = new ConsentLibConsentFormRepository(consentRepository);
+        ConsentFactory consentFactory = new ConsentFactory(this);
+        consentRepository = new ConsentLibConsentRepository(getApplicationContext(), consentFactory);
+        consentFormRepository = new ConsentLibConsentFormRepository(consentRepository, consentFactory);
         getLifecycle().addObserver(consentFormRepository);
 
         ConsentLibConsentFormLoadRequest formLoadRequest = createFormLoadRequest(this, Consent.Status.obtained());

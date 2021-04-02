@@ -1,5 +1,7 @@
 package com.abatra.android.allowance;
 
+import androidx.annotation.NonNull;
+
 import java.util.Arrays;
 import java.util.Collection;
 
@@ -38,5 +40,14 @@ public class Consent {
         public static Collection<Status> obtained() {
             return Arrays.asList(NOT_REQUIRED, OBTAINED);
         }
+    }
+
+    @NonNull
+    @Override
+    public String toString() {
+        return "Consent{" +
+                "status=" + status +
+                ", type=" + type +
+                '}';
     }
 }
