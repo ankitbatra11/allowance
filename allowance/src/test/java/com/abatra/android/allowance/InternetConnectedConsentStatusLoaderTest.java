@@ -1,7 +1,9 @@
 package com.abatra.android.allowance;
 
+import androidx.lifecycle.MutableLiveData;
+
 import com.abatra.android.wheelie.lifecycle.ILifecycleOwner;
-import com.abatra.android.wheelie.network.InternetConnectionObserver;
+import com.abatra.android.wheelie.network.InternetConnectivityChecker;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -21,7 +23,7 @@ import static org.mockito.Mockito.when;
 public class InternetConnectedConsentStatusLoaderTest {
 
     @Mock
-    private InternetConnectionObserver mockedInternetConnectionObserver;
+    private InternetConnectivityChecker mockedInternetConnectionChecker;
 
     @Mock
     private ConsentStatusLoader mockedConsentStatusLoader;
@@ -46,7 +48,7 @@ public class InternetConnectedConsentStatusLoaderTest {
     @Test
     public void test_loadConsentStatus_connectedToInternet() {
 
-        when(mockedInternetConnectionObserver.isConnectedToInternet()).thenReturn(true);
+        when(mockedInternetConnectionChecker.isConnectedToInternet()).thenReturn(new MutableLiveData<>(true));
 
         internetConnectedConsentStatusLoader.loadConsentStatus(mockedLoadConsentStatusRequest);
 
@@ -56,7 +58,7 @@ public class InternetConnectedConsentStatusLoaderTest {
     @Test
     public void test_loadConsentStatus_notConnectedToInternet() {
 
-        when(mockedInternetConnectionObserver.isConnectedToInternet()).thenReturn(false);
+        when(mockedInternetConnectionChecker.isConnectedToInternet()).thenReturn(new MutableLiveData<>(false));
 
         internetConnectedConsentStatusLoader.loadConsentStatus(mockedLoadConsentStatusRequest);
 
@@ -69,6 +71,6 @@ public class InternetConnectedConsentStatusLoaderTest {
         internetConnectedConsentStatusLoader.observeLifecycle(mockedLifecycleOwner);
 
         verify(mockedConsentStatusLoader, times(1)).observeLifecycle(mockedLifecycleOwner);
-        verify(mockedInternetConnectionObserver, times(1)).observeLifecycle(mockedLifecycleOwner);
+        verify(mockedInternetConnectionChecker, times(1)).observeLifecycle(mockedLifecycleOwner);
     }
 }

@@ -1,28 +1,30 @@
 package com.abatra.android.allowance;
 
 import com.abatra.android.wheelie.lifecycle.ILifecycleOwner;
-import com.abatra.android.wheelie.network.InternetConnectionObserver;
+import com.abatra.android.wheelie.network.InternetConnectivityChecker;
+
+import java.util.Optional;
 
 public class InternetConnectedConsentStatusLoader implements ConsentStatusLoader {
 
-    private final InternetConnectionObserver internetConnectionObserver;
+    private final InternetConnectivityChecker internetConnectivityChecker;
     private final ConsentStatusLoader delegate;
 
-    public InternetConnectedConsentStatusLoader(InternetConnectionObserver internetConnectionObserver,
+    public InternetConnectedConsentStatusLoader(InternetConnectivityChecker internetConnectivityChecker,
                                                 ConsentStatusLoader delegate) {
-        this.internetConnectionObserver = internetConnectionObserver;
+        this.internetConnectivityChecker = internetConnectivityChecker;
         this.delegate = delegate;
     }
 
     @Override
     public void observeLifecycle(ILifecycleOwner lifecycleOwner) {
-        internetConnectionObserver.observeLifecycle(lifecycleOwner);
+        internetConnectivityChecker.observeLifecycle(lifecycleOwner);
         delegate.observeLifecycle(lifecycleOwner);
     }
 
     @Override
     public void loadConsentStatus(LoadConsentStatusRequest request) {
-        if (internetConnectionObserver.isConnectedToInternet()) {
+        if (isConnectedToInternet()) {
             delegate.loadConsentStatus(request);
         } else {
             request.getStatusLoaderListener().ifPresent(listener -> {
@@ -30,5 +32,9 @@ public class InternetConnectedConsentStatusLoader implements ConsentStatusLoader
                 listener.onConsentStatusLoadFailure(error);
             });
         }
+    }
+
+    private boolean isConnectedToInternet() {
+        return Optional.ofNullable(internetConnectivityChecker.isConnectedToInternet().getValue()).orElse(false);
     }
 }

@@ -15,11 +15,12 @@ import com.abatra.android.allowance.consent.lib.ConsentFactory;
 import com.abatra.android.allowance.consent.lib.ConsentLibConsentFormRepository;
 import com.abatra.android.allowance.consent.lib.ConsentLibConsentRepository;
 import com.abatra.android.allowance.demo.databinding.ActivityMainBinding;
+import com.abatra.android.wheelie.lifecycle.ILifecycleOwner;
 import com.abatra.android.wheelie.lifecycle.Resource;
 
 import timber.log.Timber;
 
-public class MainActivity extends AppCompatActivity {
+public class MainActivity extends AppCompatActivity implements ILifecycleOwner {
 
     ConsentRepository consentRepository;
     ConsentFormRepository consentFormRepository;
@@ -40,10 +41,9 @@ public class MainActivity extends AppCompatActivity {
         SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
         ConsentLibConsentRepository delegate = new ConsentLibConsentRepository(getApplicationContext(), consentFactory);
         consentRepository = PreferenceConsentRepository.newInstance(delegate, sharedPreferences);
-        getLifecycle().addObserver(consentRepository);
 
         consentFormRepository = new ConsentLibConsentFormRepository(consentRepository, consentFactory);
-        getLifecycle().addObserver(consentFormRepository);
+        consentFormRepository.observeLifecycle(this);
 
         consentFormRepository.loadConsentForm(Utils.obtainConsentFormLoadRequest(this)).observe(this, booleanResource -> {
             if (booleanResource.getStatus() == Resource.Status.LOADED) {

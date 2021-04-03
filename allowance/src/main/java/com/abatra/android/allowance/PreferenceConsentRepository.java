@@ -14,7 +14,7 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 
 import java.util.Optional;
-import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executor;
 
 import bolts.Task;
 import timber.log.Timber;
@@ -31,7 +31,7 @@ public class PreferenceConsentRepository implements ConsentRepository, OnSharedP
     private final Gson gson;
     @Nullable
     private ResourceMutableLiveData<Consent> preferenceConsent;
-    ExecutorService backgroundExecutor = Task.BACKGROUND_EXECUTOR;
+    Executor backgroundExecutor = Task.BACKGROUND_EXECUTOR;
 
     private PreferenceConsentRepository(ConsentRepository delegate, SharedPreferences sharedPreferences, Gson gson) {
         this.delegate = delegate;
@@ -45,11 +45,13 @@ public class PreferenceConsentRepository implements ConsentRepository, OnSharedP
 
     @Override
     public void onCreate() {
+        Timber.v("Registering shared preference listener");
         sharedPreferences.registerOnSharedPreferenceChangeListener(this);
     }
 
     @Override
     public void onDestroy() {
+        Timber.v("Unregistering shared preference listener");
         sharedPreferences.unregisterOnSharedPreferenceChangeListener(this);
     }
 
@@ -63,8 +65,8 @@ public class PreferenceConsentRepository implements ConsentRepository, OnSharedP
     private void loadConsentStatus(ConsentLoadRequest consentLoadRequest, ResourceMediatorLiveData<Consent> result) {
         result.setLoading();
         preferenceConsent = new ResourceMutableLiveData<>();
-        updatePreferenceConsentLiveData(preferenceConsent);
         result.addSource(preferenceConsent, resource -> onPreferenceConsentLiveDataUpdated(consentLoadRequest, result, resource));
+        updatePreferenceConsentLiveData(preferenceConsent);
     }
 
     private void updatePreferenceConsentLiveData(ResourceMutableLiveData<Consent> preferenceConsent) {
@@ -118,6 +120,7 @@ public class PreferenceConsentRepository implements ConsentRepository, OnSharedP
     @Override
     public void upsert(Consent consent) {
         callOn(backgroundExecutor, () -> {
+            Timber.d("Updating preference with consent=%s", consent);
             sharedPreferences.edit().putString(PREF_KEY, gson.toJson(consent)).apply();
             return null;
         });
@@ -126,7 +129,7 @@ public class PreferenceConsentRepository implements ConsentRepository, OnSharedP
     @Override
     public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
         if (PREF_KEY.equals(key)) {
-            Timber.i("on consent preference changed!");
+            Timber.i("Consent preference changed!");
             Optional.ofNullable(preferenceConsent).ifPresent(this::updatePreferenceConsentLiveData);
         }
     }

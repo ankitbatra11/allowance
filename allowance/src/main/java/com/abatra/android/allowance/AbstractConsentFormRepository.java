@@ -4,6 +4,7 @@ import androidx.annotation.CallSuper;
 import androidx.annotation.Nullable;
 import androidx.lifecycle.LiveData;
 
+import com.abatra.android.wheelie.lifecycle.ILifecycleOwner;
 import com.abatra.android.wheelie.lifecycle.Resource;
 import com.abatra.android.wheelie.lifecycle.ResourceMediatorLiveData;
 
@@ -20,6 +21,12 @@ public abstract class AbstractConsentFormRepository implements ConsentFormReposi
 
     protected AbstractConsentFormRepository(ConsentRepository consentRepository) {
         this.consentRepository = consentRepository;
+    }
+
+    @Override
+    public void observeLifecycle(ILifecycleOwner lifecycleOwner) {
+        consentRepository.observeLifecycle(lifecycleOwner);
+        lifecycleOwner.getLifecycle().addObserver(this);
     }
 
     @Override
