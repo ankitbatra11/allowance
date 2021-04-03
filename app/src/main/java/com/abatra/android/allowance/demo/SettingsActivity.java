@@ -1,25 +1,26 @@
 package com.abatra.android.allowance.demo;
 
+import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.view.LayoutInflater;
 import android.view.View;
 
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 
-import com.abatra.android.allowance.Consent;
+import com.abatra.android.allowance.ConsentFormRepository;
+import com.abatra.android.allowance.ConsentRepository;
+import com.abatra.android.allowance.PreferenceConsentRepository;
 import com.abatra.android.allowance.consent.lib.ConsentFactory;
-import com.abatra.android.allowance.consent.lib.ConsentLibConsentFormLoadRequest;
 import com.abatra.android.allowance.consent.lib.ConsentLibConsentFormRepository;
 import com.abatra.android.allowance.consent.lib.ConsentLibConsentRepository;
 import com.abatra.android.allowance.demo.databinding.ActivitySettingsBinding;
 
-import static com.abatra.android.allowance.demo.Utils.createFormLoadRequest;
-
 public class SettingsActivity extends AppCompatActivity {
 
-    ConsentLibConsentRepository consentRepository;
-    ConsentLibConsentFormRepository consentFormRepository;
+    ConsentRepository consentRepository;
+    ConsentFormRepository consentFormRepository;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -29,13 +30,16 @@ public class SettingsActivity extends AppCompatActivity {
         setContentView(binding.getRoot());
 
         ConsentFactory consentFactory = new ConsentFactory(this);
-        consentRepository = new ConsentLibConsentRepository(getApplicationContext(), consentFactory);
+
+        SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
+        ConsentLibConsentRepository delegate = new ConsentLibConsentRepository(getApplicationContext(), consentFactory);
+        consentRepository = PreferenceConsentRepository.newInstance(delegate, sharedPreferences);
+        getLifecycle().addObserver(consentRepository);
+
         consentFormRepository = new ConsentLibConsentFormRepository(consentRepository, consentFactory);
         getLifecycle().addObserver(consentFormRepository);
 
-        ConsentLibConsentFormLoadRequest formLoadRequest = createFormLoadRequest(this, Consent.Status.obtained());
-        formLoadRequest.setLoadFormOnClose(true);
-        consentFormRepository.loadConsentForm(formLoadRequest).observe(this, booleanResource -> {
+        consentFormRepository.loadConsentForm(Utils.updateConsentFormLoadRequest(this)).observe(this, booleanResource -> {
             switch (booleanResource.getStatus()) {
                 case LOADING:
                     binding.buttonShowConsentForm.setVisibility(View.INVISIBLE);

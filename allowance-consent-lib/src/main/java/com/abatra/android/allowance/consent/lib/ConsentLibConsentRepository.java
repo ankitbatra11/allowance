@@ -63,5 +63,8 @@ public class ConsentLibConsentRepository extends AbstractConsentRepository {
         });
     }
 
-
+    @Override
+    public void upsert(Consent consent) {
+        Timber.w("Unsupported operation!");
+    }
 }

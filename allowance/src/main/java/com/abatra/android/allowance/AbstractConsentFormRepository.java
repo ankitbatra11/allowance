@@ -13,7 +13,7 @@ import timber.log.Timber;
 
 public abstract class AbstractConsentFormRepository implements ConsentFormRepository {
 
-    private final ConsentRepository consentRepository;
+    protected final ConsentRepository consentRepository;
 
     @Nullable
     private ConsentFormLoadRequest consentFormLoadRequest;
