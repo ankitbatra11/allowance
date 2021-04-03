@@ -9,11 +9,11 @@ import java.util.Collection;
 public abstract class ConsentFormLoadRequest {
 
     private final ConsentLoadRequest consentLoadRequest;
-    private final Collection<Consent.Status> requiredConsentStatuses;
+    private final Collection<ConsentStatus> requiredConsentStatuses;
     private final Context context;
 
     protected ConsentFormLoadRequest(ConsentLoadRequest consentLoadRequest,
-                                     Collection<Consent.Status> requiredConsentStatuses,
+                                     Collection<ConsentStatus> requiredConsentStatuses,
                                      Context context) {
         this.consentLoadRequest = consentLoadRequest;
         this.requiredConsentStatuses = requiredConsentStatuses;
@@ -24,7 +24,7 @@ public abstract class ConsentFormLoadRequest {
         return consentLoadRequest;
     }
 
-    public Collection<Consent.Status> getRequiredConsentStatuses() {
+    public Collection<ConsentStatus> getRequiredConsentStatuses() {
         return requiredConsentStatuses;
     }
 

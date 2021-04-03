@@ -26,9 +26,7 @@ public class ConsentStatusPreference implements ConsentStatusStore {
     }
 
     public static ConsentStatusPreference create(SharedPreferences sharedPreferences) {
-        return new ConsentStatusPreference(sharedPreferences, new GsonBuilder()
-                .excludeFieldsWithoutExposeAnnotation()
-                .create());
+        return new ConsentStatusPreference(sharedPreferences, new GsonBuilder().create());
     }
 
     @Override

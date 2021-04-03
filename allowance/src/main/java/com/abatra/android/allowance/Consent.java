@@ -1,45 +1,31 @@
 package com.abatra.android.allowance;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 
-import java.util.Arrays;
-import java.util.Collection;
+import java.util.Optional;
 
 public class Consent {
 
-    private final Status status;
+    private final ConsentStatus status;
+    @Nullable
     private ConsentType type;
 
-    public Consent(Status status) {
+    public Consent(ConsentStatus status) {
         this.status = status;
     }
 
-    public Status getStatus() {
+    public ConsentStatus getStatus() {
         return status;
     }
 
-    public ConsentType getType() {
-        return type;
+    public Optional<ConsentType> getType() {
+        return Optional.ofNullable(type);
     }
 
-    public Consent setType(ConsentType type) {
+    public Consent setType(@Nullable ConsentType type) {
         this.type = type;
         return this;
-    }
-
-    public enum Status {
-        REQUIRED,
-        NOT_REQUIRED,
-        OBTAINED,
-        UNKNOWN;
-
-        public static Collection<Status> required() {
-            return Arrays.asList(REQUIRED, UNKNOWN);
-        }
-
-        public static Collection<Status> obtained() {
-            return Arrays.asList(NOT_REQUIRED, OBTAINED);
-        }
     }
 
     @NonNull

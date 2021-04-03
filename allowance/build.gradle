@@ -48,7 +48,7 @@ dependencies {
 
     coreLibraryDesugaring 'com.android.tools:desugar_jdk_libs:1.1.5'
 
-    api group: 'com.github.ankitbatra11', name: 'wheelie', version: '4.28.0'
+    api group: 'com.github.ankitbatra11', name: 'wheelie', version: '4.29.0'
     api 'com.google.code.gson:gson:2.8.6'
     api 'com.parse.bolts:bolts-tasks:1.4.0'
 
@@ -64,6 +64,8 @@ dependencies {
     testImplementation group: 'org.mockito', name: 'mockito-inline', version: mockitoVersion
 
     testImplementation 'org.awaitility:awaitility:4.0.3'
+
+    testImplementation group: 'android.arch.core', name: 'core-testing', version: '1.1.1'
 
     androidTestImplementation 'androidx.test.ext:junit:1.1.2'
     androidTestImplementation 'androidx.test.espresso:espresso-core:3.3.0'

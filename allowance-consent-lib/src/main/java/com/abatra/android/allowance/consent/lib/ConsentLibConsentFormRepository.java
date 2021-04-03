@@ -107,6 +107,7 @@ public class ConsentLibConsentFormRepository extends AbstractConsentFormReposito
             Timber.i("consent=%s userPrefersAdFreeOption=%b", consentStatus, userPrefersAdFree);
 
             Consent consent = consentFactory.createConsent(consentStatus);
+            consentRepository.upsert(consent);
 
             if (isLoadFormOnClose()) {
 

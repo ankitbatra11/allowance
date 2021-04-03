@@ -19,14 +19,14 @@ public class ConsentFactory {
         switch (consentStatus) {
             case UNKNOWN:
                 if (ConsentInformation.getInstance(context).isRequestLocationInEeaOrUnknown()) {
-                    return new Consent(Consent.Status.UNKNOWN);
+                    return new Consent(com.abatra.android.allowance.ConsentStatus.UNKNOWN);
                 } else {
-                    return new Consent(Consent.Status.NOT_REQUIRED);
+                    return new Consent(com.abatra.android.allowance.ConsentStatus.NOT_REQUIRED);
                 }
             case NON_PERSONALIZED:
-                return new Consent(Consent.Status.OBTAINED).setType(ConsentType.NPA);
+                return new Consent(com.abatra.android.allowance.ConsentStatus.OBTAINED).setType(ConsentType.NPA);
             case PERSONALIZED:
-                return new Consent(Consent.Status.OBTAINED).setType(ConsentType.PA);
+                return new Consent(com.abatra.android.allowance.ConsentStatus.OBTAINED).setType(ConsentType.PA);
         }
         throw new IllegalArgumentException("Invalid status=" + consentStatus);
     }
