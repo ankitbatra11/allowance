@@ -16,9 +16,9 @@ import com.abatra.android.allowance.consent.lib.ConsentFactory;
 import com.abatra.android.allowance.consent.lib.ConsentLibConsentFormRepository;
 import com.abatra.android.allowance.consent.lib.ConsentLibConsentRepository;
 import com.abatra.android.allowance.demo.databinding.ActivitySettingsBinding;
-import com.abatra.android.wheelie.lifecycle.ILifecycleOwner;
+import com.abatra.android.wheelie.lifecycle.owner.ILifecycleOwner;
 
-public class SettingsActivity extends AppCompatActivity implements ILifecycleOwner {
+public class SettingsActivity extends AppCompatActivity {
 
     ConsentRepository consentRepository;
     ConsentFormRepository consentFormRepository;
@@ -37,7 +37,7 @@ public class SettingsActivity extends AppCompatActivity implements ILifecycleOwn
         consentRepository = PreferenceConsentRepository.newInstance(delegate, sharedPreferences);
 
         consentFormRepository = new ConsentLibConsentFormRepository(consentRepository, consentFactory);
-        consentFormRepository.observeLifecycle(this);
+        consentFormRepository.observeLifecycle(ILifecycleOwner.activity(this));
 
         consentFormRepository.loadConsentForm(Utils.updateConsentFormLoadRequest(this)).observe(this, booleanResource -> {
             switch (booleanResource.getStatus()) {

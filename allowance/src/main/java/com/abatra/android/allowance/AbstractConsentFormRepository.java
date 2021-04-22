@@ -4,9 +4,9 @@ import androidx.annotation.CallSuper;
 import androidx.annotation.Nullable;
 import androidx.lifecycle.LiveData;
 
-import com.abatra.android.wheelie.lifecycle.ILifecycleOwner;
-import com.abatra.android.wheelie.lifecycle.Resource;
-import com.abatra.android.wheelie.lifecycle.ResourceMediatorLiveData;
+import com.abatra.android.wheelie.lifecycle.Lce;
+import com.abatra.android.wheelie.lifecycle.LceMediatorLiveData;
+import com.abatra.android.wheelie.lifecycle.owner.ILifecycleOwner;
 
 import java.util.Optional;
 
@@ -30,11 +30,11 @@ public abstract class AbstractConsentFormRepository implements ConsentFormReposi
     }
 
     @Override
-    public LiveData<Resource<Boolean>> loadConsentForm(ConsentFormLoadRequest consentFormLoadRequest) {
+    public LiveData<Lce<Boolean>> loadConsentForm(ConsentFormLoadRequest consentFormLoadRequest) {
 
         this.consentFormLoadRequest = consentFormLoadRequest;
 
-        ResourceMediatorLiveData<Boolean> result = new ResourceMediatorLiveData<>();
+        LceMediatorLiveData<Boolean> result = new LceMediatorLiveData<>();
 
         ConsentLoadRequest consentLoadRequest = consentFormLoadRequest.getConsentLoadRequest();
         result.addSource(consentRepository.loadConsentStatus(consentLoadRequest), r -> checkConsentAndLoadForm(r, result));
@@ -44,12 +44,12 @@ public abstract class AbstractConsentFormRepository implements ConsentFormReposi
         return result;
     }
 
-    protected void checkConsentAndLoadForm(Resource<Consent> consentResource,
-                                           ResourceMediatorLiveData<Boolean> result) {
+    protected void checkConsentAndLoadForm(Lce<Consent> consentLce,
+                                           LceMediatorLiveData<Boolean> result) {
 
         boolean meetsCriteria = getConsentFormLoadRequest()
                 .map(ConsentFormLoadRequest::getRequiredConsentStatuses)
-                .map(reqStatus -> consentResource.getStatus() == Resource.Status.LOADED && reqStatus.contains(consentResource.getData().getStatus()))
+                .map(reqStatus -> consentLce.getStatus() == Lce.Status.LOADED && reqStatus.contains(consentLce.getData().getStatus()))
                 .orElse(false);
 
         if (meetsCriteria) {
@@ -57,8 +57,8 @@ public abstract class AbstractConsentFormRepository implements ConsentFormReposi
         } else {
             result.postError(new RuntimeException("Does not meet consent status criteria in req=" + consentFormLoadRequest));
         }
-        Timber.d("consentResource=%s consentFormLoadRequest=%s meetsCriteria=%b",
-                consentResource, consentFormLoadRequest, meetsCriteria);
+        Timber.d("consentLce=%s consentFormLoadRequest=%s meetsCriteria=%b",
+                consentLce, consentFormLoadRequest, meetsCriteria);
     }
 
     protected Optional<ConsentFormLoadRequest> getConsentFormLoadRequest() {
@@ -66,7 +66,7 @@ public abstract class AbstractConsentFormRepository implements ConsentFormReposi
     }
 
     private void withRequiredConsentLoadConsentForm(ConsentFormLoadRequest formLoadRequest,
-                                                    ResourceMediatorLiveData<Boolean> result) {
+                                                    LceMediatorLiveData<Boolean> result) {
         try {
             tryLoadingConsentForm(formLoadRequest, result);
         } catch (Throwable error) {
@@ -75,7 +75,7 @@ public abstract class AbstractConsentFormRepository implements ConsentFormReposi
     }
 
     protected abstract void tryLoadingConsentForm(ConsentFormLoadRequest consentFormLoadRequest,
-                                                  ResourceMediatorLiveData<Boolean> result);
+                                                  LceMediatorLiveData<Boolean> result);
 
     @Override
     @CallSuper

@@ -7,8 +7,8 @@ import com.abatra.android.allowance.Consent;
 import com.abatra.android.allowance.ConsentFormCallback;
 import com.abatra.android.allowance.ConsentFormLoadRequest;
 import com.abatra.android.allowance.ConsentRepository;
-import com.abatra.android.wheelie.lifecycle.Resource;
-import com.abatra.android.wheelie.lifecycle.ResourceMediatorLiveData;
+import com.abatra.android.wheelie.lifecycle.Lce;
+import com.abatra.android.wheelie.lifecycle.LceMediatorLiveData;
 import com.google.ads.consent.ConsentForm;
 import com.google.ads.consent.ConsentFormListener;
 import com.google.ads.consent.ConsentStatus;
@@ -36,7 +36,7 @@ public class ConsentLibConsentFormRepository extends AbstractConsentFormReposito
 
     @Override
     protected void tryLoadingConsentForm(ConsentFormLoadRequest consentFormLoadRequest,
-                                         ResourceMediatorLiveData<Boolean> result) {
+                                         LceMediatorLiveData<Boolean> result) {
 
         ConsentLibConsentFormLoadRequest loadRequest = (ConsentLibConsentFormLoadRequest) consentFormLoadRequest;
 
@@ -75,10 +75,10 @@ public class ConsentLibConsentFormRepository extends AbstractConsentFormReposito
 
     private class LiveDataConsentFormListener extends ConsentFormListener {
 
-        private final ResourceMediatorLiveData<Boolean> loadStatusLiveData;
+        private final LceMediatorLiveData<Boolean> loadStatusLiveData;
         private ConsentFormCallback consentFormCallback;
 
-        private LiveDataConsentFormListener(ResourceMediatorLiveData<Boolean> loadStatusLiveData) {
+        private LiveDataConsentFormListener(LceMediatorLiveData<Boolean> loadStatusLiveData) {
             this.loadStatusLiveData = loadStatusLiveData;
         }
 
@@ -115,7 +115,7 @@ public class ConsentLibConsentFormRepository extends AbstractConsentFormReposito
                 consentFormListener = null;
 
                 loadStatusLiveData.setLoading();
-                checkConsentAndLoadForm(Resource.loaded(consent), loadStatusLiveData);
+                checkConsentAndLoadForm(Lce.loaded(consent), loadStatusLiveData);
             }
             consentFormCallback.onConsentFormDismissed(consent, Boolean.TRUE.equals(userPrefersAdFree));
         }

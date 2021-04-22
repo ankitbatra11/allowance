@@ -6,9 +6,10 @@ import android.content.SharedPreferences.OnSharedPreferenceChangeListener;
 import androidx.annotation.Nullable;
 import androidx.lifecycle.LiveData;
 
-import com.abatra.android.wheelie.lifecycle.Resource;
-import com.abatra.android.wheelie.lifecycle.ResourceMediatorLiveData;
-import com.abatra.android.wheelie.lifecycle.ResourceMutableLiveData;
+import com.abatra.android.wheelie.lifecycle.Lce;
+import com.abatra.android.wheelie.lifecycle.LceMediatorLiveData;
+import com.abatra.android.wheelie.lifecycle.LceMutableLiveData;
+import com.abatra.android.wheelie.lifecycle.owner.ILifecycleOwner;
 import com.abatra.android.wheelie.thread.BoltsUtils;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
@@ -30,7 +31,7 @@ public class PreferenceConsentRepository implements ConsentRepository, OnSharedP
     private final SharedPreferences sharedPreferences;
     private final Gson gson;
     @Nullable
-    private ResourceMutableLiveData<Consent> preferenceConsent;
+    private LceMutableLiveData<Consent> preferenceConsent;
     Executor backgroundExecutor = Task.BACKGROUND_EXECUTOR;
 
     private PreferenceConsentRepository(ConsentRepository delegate, SharedPreferences sharedPreferences, Gson gson) {
@@ -41,6 +42,11 @@ public class PreferenceConsentRepository implements ConsentRepository, OnSharedP
 
     public static PreferenceConsentRepository newInstance(ConsentRepository delegate, SharedPreferences sharedPreferences) {
         return new PreferenceConsentRepository(delegate, sharedPreferences, new GsonBuilder().create());
+    }
+
+    @Override
+    public void observeLifecycle(ILifecycleOwner lifecycleOwner) {
+        delegate.observeLifecycle(lifecycleOwner);
     }
 
     @Override
@@ -56,20 +62,20 @@ public class PreferenceConsentRepository implements ConsentRepository, OnSharedP
     }
 
     @Override
-    public LiveData<Resource<Consent>> loadConsentStatus(ConsentLoadRequest consentLoadRequest) {
-        ResourceMediatorLiveData<Consent> result = new ResourceMediatorLiveData<>();
+    public LiveData<Lce<Consent>> loadConsentStatus(ConsentLoadRequest consentLoadRequest) {
+        LceMediatorLiveData<Consent> result = new LceMediatorLiveData<>();
         loadConsentStatus(consentLoadRequest, result);
         return result;
     }
 
-    private void loadConsentStatus(ConsentLoadRequest consentLoadRequest, ResourceMediatorLiveData<Consent> result) {
+    private void loadConsentStatus(ConsentLoadRequest consentLoadRequest, LceMediatorLiveData<Consent> result) {
         result.setLoading();
-        preferenceConsent = new ResourceMutableLiveData<>();
-        result.addSource(preferenceConsent, resource -> onPreferenceConsentLiveDataUpdated(consentLoadRequest, result, resource));
+        preferenceConsent = new LceMutableLiveData<>();
+        result.addSource(preferenceConsent, Lce -> onPreferenceConsentLiveDataUpdated(consentLoadRequest, result, Lce));
         updatePreferenceConsentLiveData(preferenceConsent);
     }
 
-    private void updatePreferenceConsentLiveData(ResourceMutableLiveData<Consent> preferenceConsent) {
+    private void updatePreferenceConsentLiveData(LceMutableLiveData<Consent> preferenceConsent) {
         callOn(backgroundExecutor, this::loadConsentFromPreference).continueOnUiThread(task -> {
             if (task.getError() != null) {
                 preferenceConsent.setError(task.getError());
@@ -86,24 +92,24 @@ public class PreferenceConsentRepository implements ConsentRepository, OnSharedP
     }
 
     private void onPreferenceConsentLiveDataUpdated(ConsentLoadRequest consentLoadRequest,
-                                                    ResourceMediatorLiveData<Consent> result,
-                                                    Resource<Consent> consentResource) {
-        if (consentResource.getStatus() == Resource.Status.LOADED) {
-            result.setValue(consentResource);
+                                                    LceMediatorLiveData<Consent> result,
+                                                    Lce<Consent> consentLce) {
+        if (consentLce.getStatus() == Lce.Status.LOADED) {
+            result.setValue(consentLce);
         } else {
             loadConsentFromNetwork(consentLoadRequest, result);
         }
     }
 
-    private void loadConsentFromNetwork(ConsentLoadRequest request, ResourceMediatorLiveData<Consent> result) {
-        result.addSource(delegate.loadConsentStatus(request), resource -> onNetworkConsentLiveDataUpdated(result, resource));
+    private void loadConsentFromNetwork(ConsentLoadRequest request, LceMediatorLiveData<Consent> result) {
+        result.addSource(delegate.loadConsentStatus(request), Lce -> onNetworkConsentLiveDataUpdated(result, Lce));
     }
 
-    private void onNetworkConsentLiveDataUpdated(ResourceMediatorLiveData<Consent> result, Resource<Consent> resource) {
-        if (resource.getStatus() == Resource.Status.LOADED) {
-            upsert(resource.getData());
+    private void onNetworkConsentLiveDataUpdated(LceMediatorLiveData<Consent> result, Lce<Consent> Lce) {
+        if (Lce.getStatus() == com.abatra.android.wheelie.lifecycle.Lce.Status.LOADED) {
+            upsert(Lce.getData());
         } else {
-            result.setValue(resource);
+            result.setValue(Lce);
         }
     }
 

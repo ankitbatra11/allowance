@@ -10,7 +10,8 @@ import androidx.lifecycle.LifecycleRegistry;
 import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.Observer;
 
-import com.abatra.android.wheelie.lifecycle.Resource;
+import com.abatra.android.wheelie.lifecycle.Lce;
+import com.google.gson.GsonBuilder;
 
 import org.junit.After;
 import org.junit.Before;
@@ -52,14 +53,14 @@ public class PreferenceConsentRepositoryTest {
     private LifecycleOwner mockedLifecycleOwner;
 
     @Mock
-    private Observer<Resource<Consent>> mockedConsentResourceObserver;
+    private Observer<Lce<Consent>> mockedConsentLceObserver;
 
     @Captor
-    private ArgumentCaptor<Resource<Consent>> consentResourceArgumentCaptor;
+    private ArgumentCaptor<Lce<Consent>> consentLceArgumentCaptor;
 
     private SharedPreferences sharedPreferences;
 
-    private final MutableLiveData<Resource<Consent>> consentLiveData = new MutableLiveData<>();
+    private final MutableLiveData<Lce<Consent>> consentLiveData = new MutableLiveData<>();
 
     @Before
     public void setup() {
@@ -68,7 +69,7 @@ public class PreferenceConsentRepositoryTest {
 
         doAnswer(invocation ->
         {
-            consentLiveData.setValue(Resource.loaded(new Consent(ConsentStatus.UNKNOWN)));
+            consentLiveData.setValue(Lce.loaded(new Consent(ConsentStatus.UNKNOWN)));
             return consentLiveData;
 
         }).when(mockedConsentRepository).loadConsentStatus(any());
@@ -107,16 +108,16 @@ public class PreferenceConsentRepositoryTest {
     }
 
     private void verifyObserverOnChangedCalls(Consent consent) {
-        verify(mockedConsentResourceObserver, times(2)).onChanged(consentResourceArgumentCaptor.capture());
-        assertThat(consentResourceArgumentCaptor.getAllValues(), hasSize(2));
-        assertThat(consentResourceArgumentCaptor.getAllValues().get(0).getStatus(), equalTo(Resource.Status.LOADING));
-        assertThat(consentResourceArgumentCaptor.getAllValues().get(0).getData(), nullValue());
-        assertThat(consentResourceArgumentCaptor.getAllValues().get(1).getStatus(), equalTo(Resource.Status.LOADED));
-        assertThat(consentResourceArgumentCaptor.getAllValues().get(1).getData().toString(), equalTo(consent.toString()));
+        verify(mockedConsentLceObserver, times(2)).onChanged(consentLceArgumentCaptor.capture());
+        assertThat(consentLceArgumentCaptor.getAllValues(), hasSize(2));
+        assertThat(consentLceArgumentCaptor.getAllValues().get(0).getStatus(), equalTo(Lce.Status.LOADING));
+        assertThat(consentLceArgumentCaptor.getAllValues().get(0).getData(), nullValue());
+        assertThat(consentLceArgumentCaptor.getAllValues().get(1).getStatus(), equalTo(Lce.Status.LOADED));
+        assertThat(consentLceArgumentCaptor.getAllValues().get(1).getData().toString(), equalTo(consent.toString()));
     }
 
     private void loadConsentStatus() {
-        repository.loadConsentStatus(null).observe(mockedLifecycleOwner, mockedConsentResourceObserver);
+        repository.loadConsentStatus(null).observe(mockedLifecycleOwner, mockedConsentLceObserver);
         Robolectric.flushForegroundThreadScheduler();
     }
 
@@ -129,9 +130,13 @@ public class PreferenceConsentRepositoryTest {
 
         await().untilAsserted(() -> {
 
-            verifyObserverOnChangedCalls(new Consent(ConsentStatus.UNKNOWN));
+            Consent consent = new Consent(ConsentStatus.UNKNOWN);
+            verifyObserverOnChangedCalls(consent);
 
             verify(mockedConsentRepository, times(1)).loadConsentStatus(null);
+
+            String json = sharedPreferences.getString(PreferenceConsentRepository.PREF_KEY, "");
+            assertThat(new GsonBuilder().create().fromJson(json, Consent.class).toString(), equalTo(consent.toString()));
         });
     }
 }

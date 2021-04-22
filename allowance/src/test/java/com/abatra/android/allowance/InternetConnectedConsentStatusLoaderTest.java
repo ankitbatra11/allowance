@@ -2,7 +2,7 @@ package com.abatra.android.allowance;
 
 import androidx.lifecycle.MutableLiveData;
 
-import com.abatra.android.wheelie.lifecycle.ILifecycleOwner;
+import com.abatra.android.wheelie.lifecycle.owner.ILifecycleOwner;
 import com.abatra.android.wheelie.network.InternetConnectivityChecker;
 
 import org.junit.Before;

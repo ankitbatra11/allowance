@@ -2,6 +2,8 @@ package com.abatra.android.allowance;
 
 import androidx.annotation.Nullable;
 
+import com.abatra.android.wheelie.lifecycle.owner.ILifecycleOwner;
+
 import java.util.Optional;
 
 import timber.log.Timber;
@@ -14,6 +16,11 @@ abstract public class AbstractConsentStatusLoader implements ConsentStatusLoader
 
     protected AbstractConsentStatusLoader(ConsentStatusStore consentStatusStore) {
         this.consentStatusStore = consentStatusStore;
+    }
+
+    @Override
+    public void observeLifecycle(ILifecycleOwner lifecycleOwner) {
+        lifecycleOwner.getLifecycle().addObserver(this);
     }
 
     @Override

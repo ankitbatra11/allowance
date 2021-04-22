@@ -2,8 +2,9 @@ package com.abatra.android.allowance;
 
 import androidx.lifecycle.LiveData;
 
-import com.abatra.android.wheelie.lifecycle.Resource;
-import com.abatra.android.wheelie.lifecycle.ResourceMutableLiveData;
+import com.abatra.android.wheelie.lifecycle.Lce;
+import com.abatra.android.wheelie.lifecycle.LceMutableLiveData;
+import com.abatra.android.wheelie.lifecycle.owner.ILifecycleOwner;
 
 import java.util.concurrent.Executor;
 
@@ -17,14 +18,19 @@ public abstract class AbstractConsentRepository implements ConsentRepository {
     Executor backgroundExecutor = Task.BACKGROUND_EXECUTOR;
 
     @Override
-    public LiveData<Resource<Consent>> loadConsentStatus(ConsentLoadRequest consentLoadRequest) {
-        ResourceMutableLiveData<Consent> result = new ResourceMutableLiveData<>();
+    public void observeLifecycle(ILifecycleOwner lifecycleOwner) {
+        lifecycleOwner.getLifecycle().addObserver(this);
+    }
+
+    @Override
+    public LiveData<Lce<Consent>> loadConsentStatus(ConsentLoadRequest consentLoadRequest) {
+        LceMutableLiveData<Consent> result = new LceMutableLiveData<>();
         loadConsentStatusInternal(consentLoadRequest, result);
         return result;
     }
 
     private void loadConsentStatusInternal(ConsentLoadRequest consentLoadRequest,
-                                           ResourceMutableLiveData<Consent> result) {
+                                           LceMutableLiveData<Consent> result) {
         result.setLoading();
         callOn(backgroundExecutor, () -> {
             try {
@@ -38,5 +44,5 @@ public abstract class AbstractConsentRepository implements ConsentRepository {
     }
 
     protected abstract void tryLoadingConsentStatus(ConsentLoadRequest consentLoadRequest,
-                                                    ResourceMutableLiveData<Consent> result);
+                                                    LceMutableLiveData<Consent> result);
 }
