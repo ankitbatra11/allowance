@@ -2,7 +2,7 @@ package com.abatra.android.allowance;
 
 import androidx.annotation.Nullable;
 
-import com.abatra.android.wheelie.lifecycle.ILifecycleOwner;
+import com.abatra.android.wheelie.lifecycle.owner.ILifecycleOwner;
 
 import java.net.MalformedURLException;
 import java.util.Optional;

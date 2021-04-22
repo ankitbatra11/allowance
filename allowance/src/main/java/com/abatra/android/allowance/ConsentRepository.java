@@ -2,12 +2,12 @@ package com.abatra.android.allowance;
 
 import androidx.lifecycle.LiveData;
 
-import com.abatra.android.wheelie.lifecycle.ILifecycleObserver;
-import com.abatra.android.wheelie.lifecycle.Resource;
+import com.abatra.android.wheelie.lifecycle.Lce;
+import com.abatra.android.wheelie.lifecycle.observer.ILifecycleObserver;
 
 public interface ConsentRepository extends ILifecycleObserver {
 
-    LiveData<Resource<Consent>> loadConsentStatus(ConsentLoadRequest consentLoadRequest);
+    LiveData<Lce<Consent>> loadConsentStatus(ConsentLoadRequest consentLoadRequest);
 
     void upsert(Consent consent);
 }

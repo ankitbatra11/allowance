@@ -5,7 +5,7 @@ import android.content.Context;
 import com.abatra.android.allowance.AbstractConsentRepository;
 import com.abatra.android.allowance.Consent;
 import com.abatra.android.allowance.ConsentLoadRequest;
-import com.abatra.android.wheelie.lifecycle.ResourceMutableLiveData;
+import com.abatra.android.wheelie.lifecycle.LceMutableLiveData;
 import com.google.ads.consent.ConsentInfoUpdateListener;
 import com.google.ads.consent.ConsentInformation;
 import com.google.ads.consent.ConsentStatus;
@@ -24,7 +24,7 @@ public class ConsentLibConsentRepository extends AbstractConsentRepository {
     }
 
     @Override
-    protected void tryLoadingConsentStatus(ConsentLoadRequest consentLoadRequest, ResourceMutableLiveData<Consent> result) {
+    protected void tryLoadingConsentStatus(ConsentLoadRequest consentLoadRequest, LceMutableLiveData<Consent> result) {
 
         ConsentLibConsentLoadRequest loadRequest = (ConsentLibConsentLoadRequest) consentLoadRequest;
 

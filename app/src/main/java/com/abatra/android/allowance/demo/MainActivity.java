@@ -15,12 +15,12 @@ import com.abatra.android.allowance.consent.lib.ConsentFactory;
 import com.abatra.android.allowance.consent.lib.ConsentLibConsentFormRepository;
 import com.abatra.android.allowance.consent.lib.ConsentLibConsentRepository;
 import com.abatra.android.allowance.demo.databinding.ActivityMainBinding;
-import com.abatra.android.wheelie.lifecycle.ILifecycleOwner;
-import com.abatra.android.wheelie.lifecycle.Resource;
+import com.abatra.android.wheelie.lifecycle.Lce;
+import com.abatra.android.wheelie.lifecycle.owner.ILifecycleOwner;
 
 import timber.log.Timber;
 
-public class MainActivity extends AppCompatActivity implements ILifecycleOwner {
+public class MainActivity extends AppCompatActivity {
 
     ConsentRepository consentRepository;
     ConsentFormRepository consentFormRepository;
@@ -43,10 +43,10 @@ public class MainActivity extends AppCompatActivity implements ILifecycleOwner {
         consentRepository = PreferenceConsentRepository.newInstance(delegate, sharedPreferences);
 
         consentFormRepository = new ConsentLibConsentFormRepository(consentRepository, consentFactory);
-        consentFormRepository.observeLifecycle(this);
+        consentFormRepository.observeLifecycle(ILifecycleOwner.activity(this));
 
         consentFormRepository.loadConsentForm(Utils.obtainConsentFormLoadRequest(this)).observe(this, booleanResource -> {
-            if (booleanResource.getStatus() == Resource.Status.LOADED) {
+            if (booleanResource.getStatus() == Lce.Status.LOADED) {
                 consentFormRepository.showConsentForm((consent, userPrefersAdFreeOption) -> {
                 });
             }

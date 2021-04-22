@@ -1,6 +1,6 @@
 package com.abatra.android.allowance;
 
-import com.abatra.android.wheelie.lifecycle.ILifecycleOwner;
+import com.abatra.android.wheelie.lifecycle.owner.ILifecycleOwner;
 import com.abatra.android.wheelie.network.InternetConnectivityChecker;
 
 import java.util.Optional;
