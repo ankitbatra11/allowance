@@ -10,7 +10,7 @@ import androidx.lifecycle.LifecycleRegistry;
 import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.Observer;
 
-import com.abatra.android.wheelie.lifecycle.Lce;
+import com.abatra.android.wheelie.core.Lce;
 import com.google.gson.GsonBuilder;
 
 import org.junit.After;
