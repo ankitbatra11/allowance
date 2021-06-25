@@ -4,8 +4,8 @@ import androidx.annotation.CallSuper;
 import androidx.annotation.Nullable;
 import androidx.lifecycle.LiveData;
 
-import com.abatra.android.wheelie.lifecycle.Lce;
-import com.abatra.android.wheelie.lifecycle.LceMediatorLiveData;
+import com.abatra.android.wheelie.core.Lce;
+import com.abatra.android.wheelie.lifecycle.liveData.LceMediatorLiveData;
 import com.abatra.android.wheelie.lifecycle.owner.ILifecycleOwner;
 
 import java.util.Optional;

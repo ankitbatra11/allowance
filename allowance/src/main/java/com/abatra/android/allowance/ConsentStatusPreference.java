@@ -2,6 +2,7 @@ package com.abatra.android.allowance;
 
 import android.content.SharedPreferences;
 
+import com.abatra.android.wheelie.core.async.bolts.SaferTask;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 
@@ -9,8 +10,6 @@ import java.util.concurrent.Executor;
 
 import bolts.Task;
 import timber.log.Timber;
-
-import static com.abatra.android.wheelie.thread.SaferTask.callOn;
 
 public class ConsentStatusPreference implements ConsentStatusStore {
 
@@ -31,7 +30,7 @@ public class ConsentStatusPreference implements ConsentStatusStore {
 
     @Override
     public void loadedSuccessfully(ConsentStatusLoaderResponse response) {
-        callOn(executor, () -> {
+        SaferTask.callOn(executor, () -> {
             String value = gson.toJson(response);
             preferences.edit().putString(PREF_KEY, value).apply();
             Timber.d("saved consent=%s json=%s", response, value);

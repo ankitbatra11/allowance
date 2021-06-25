@@ -15,7 +15,7 @@ import com.abatra.android.allowance.consent.lib.ConsentFactory;
 import com.abatra.android.allowance.consent.lib.ConsentLibConsentFormRepository;
 import com.abatra.android.allowance.consent.lib.ConsentLibConsentRepository;
 import com.abatra.android.allowance.demo.databinding.ActivityMainBinding;
-import com.abatra.android.wheelie.lifecycle.Lce;
+import com.abatra.android.wheelie.core.Lce;
 import com.abatra.android.wheelie.lifecycle.owner.ILifecycleOwner;
 
 import timber.log.Timber;
