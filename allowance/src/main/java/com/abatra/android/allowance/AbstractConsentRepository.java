@@ -2,8 +2,8 @@ package com.abatra.android.allowance;
 
 import androidx.lifecycle.LiveData;
 
-import com.abatra.android.wheelie.lifecycle.Lce;
-import com.abatra.android.wheelie.lifecycle.LceMutableLiveData;
+import com.abatra.android.wheelie.core.Lce;
+import com.abatra.android.wheelie.lifecycle.liveData.LceMutableLiveData;
 import com.abatra.android.wheelie.lifecycle.owner.ILifecycleOwner;
 
 import java.util.concurrent.Executor;
@@ -11,7 +11,7 @@ import java.util.concurrent.Executor;
 import bolts.Task;
 import timber.log.Timber;
 
-import static com.abatra.android.wheelie.thread.SaferTask.callOn;
+import static com.abatra.android.wheelie.core.async.bolts.SaferTask.callOn;
 
 public abstract class AbstractConsentRepository implements ConsentRepository {
 

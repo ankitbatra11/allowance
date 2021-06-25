@@ -6,11 +6,11 @@ import android.content.SharedPreferences.OnSharedPreferenceChangeListener;
 import androidx.annotation.Nullable;
 import androidx.lifecycle.LiveData;
 
-import com.abatra.android.wheelie.lifecycle.Lce;
-import com.abatra.android.wheelie.lifecycle.LceMediatorLiveData;
-import com.abatra.android.wheelie.lifecycle.LceMutableLiveData;
+import com.abatra.android.wheelie.core.Lce;
+import com.abatra.android.wheelie.core.async.bolts.BoltsUtils;
+import com.abatra.android.wheelie.lifecycle.liveData.LceMediatorLiveData;
+import com.abatra.android.wheelie.lifecycle.liveData.LceMutableLiveData;
 import com.abatra.android.wheelie.lifecycle.owner.ILifecycleOwner;
-import com.abatra.android.wheelie.thread.BoltsUtils;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 
@@ -20,7 +20,7 @@ import java.util.concurrent.Executor;
 import bolts.Task;
 import timber.log.Timber;
 
-import static com.abatra.android.wheelie.thread.SaferTask.callOn;
+import static com.abatra.android.wheelie.core.async.bolts.SaferTask.callOn;
 
 public class PreferenceConsentRepository implements ConsentRepository, OnSharedPreferenceChangeListener {
 
@@ -106,7 +106,7 @@ public class PreferenceConsentRepository implements ConsentRepository, OnSharedP
     }
 
     private void onNetworkConsentLiveDataUpdated(LceMediatorLiveData<Consent> result, Lce<Consent> Lce) {
-        if (Lce.getStatus() == com.abatra.android.wheelie.lifecycle.Lce.Status.LOADED) {
+        if (Lce.getStatus() == com.abatra.android.wheelie.core.Lce.Status.LOADED) {
             upsert(Lce.getData());
         } else {
             result.setValue(Lce);

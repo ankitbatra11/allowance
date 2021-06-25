@@ -5,7 +5,7 @@ import android.content.Context;
 import com.abatra.android.allowance.AbstractConsentRepository;
 import com.abatra.android.allowance.Consent;
 import com.abatra.android.allowance.ConsentLoadRequest;
-import com.abatra.android.wheelie.lifecycle.LceMutableLiveData;
+import com.abatra.android.wheelie.lifecycle.liveData.LceMutableLiveData;
 import com.google.ads.consent.ConsentInfoUpdateListener;
 import com.google.ads.consent.ConsentInformation;
 import com.google.ads.consent.ConsentStatus;

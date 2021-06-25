@@ -2,7 +2,7 @@ package com.abatra.android.allowance;
 
 import androidx.annotation.Nullable;
 
-import com.abatra.android.wheelie.lifecycle.LifecycleObserverObservable;
+import com.abatra.android.wheelie.lifecycle.observer.LifecycleObserverObservable;
 
 public interface ConsentFormLoader extends LifecycleObserverObservable<ConsentFormLoader.Listener>, ConsentFormShower {
 
